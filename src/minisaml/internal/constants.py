@@ -1,0 +1,5 @@
+NAMES_SAML2_PROTOCOL = "urn:oasis:names:tc:SAML:2.0:protocol"
+NAMES_SAML2_ASSERTION = "urn:oasis:names:tc:SAML:2.0:assertion"
+NAMEID_FORMAT_UNSPECIFIED = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
+BINDINGS_HTTP_POST = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
