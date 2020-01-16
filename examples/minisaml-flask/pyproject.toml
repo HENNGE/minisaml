@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "minisaml-flask"
+version = "0.1.0"
+description = ""
+authors = ["Jonas Obrist <jonas.obrist@hennge.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+flask = "^1.1.1"
+minisaml = {path = "../../"}
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

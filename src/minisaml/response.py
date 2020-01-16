@@ -9,12 +9,7 @@ from lxml.etree import QName
 from minisignxml.errors import ElementNotFound
 from minisignxml.verify import extract_verified_element
 
-from .errors import (
-    MalformedSAMLResponse,
-    ResponseExpired,
-    ResponseTooEarly,
-    ResponseUnsuccessful,
-)
+from .errors import MalformedSAMLResponse, ResponseExpired, ResponseTooEarly
 from .internal.constants import *
 from .internal.namespaces import NAMESPACE_MAP
 from .internal.saml import saml_to_datetime
@@ -66,7 +61,6 @@ def validate_response(*, data: bytes, certificate: Certificate) -> Response:
     not_before = saml_to_datetime(conditions.attrib["NotBefore"])
     not_on_or_after = saml_to_datetime(conditions.attrib["NotOnOrAfter"])
     now = datetime.datetime.utcnow()
-    print(now, not_before, not_on_or_after)
     if now < not_before:
         raise ResponseTooEarly()
     if now >= not_on_or_after:

@@ -6,7 +6,7 @@ authors = ["Jonas Obrist <jonas.obrist@hde.co.jp>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-minisignxml = {"git" = "https://github.com/HENNGE/minisignxml.git"}
+minisignxml = {"git" = "git@github.com:HENNGE/minisignxml.git"}
 lxml = "^4.4.1"
 yarl = "^1.4.2"
 
