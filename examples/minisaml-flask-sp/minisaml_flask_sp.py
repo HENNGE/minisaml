@@ -1,4 +1,5 @@
 import os
+import secrets
 import sys
 
 from cryptography.hazmat.backends import default_backend
@@ -8,6 +9,7 @@ from minisaml.request import get_request_redirect_url
 from minisaml.response import validate_response
 
 app = Flask(__name__)
+app.secret_key = secrets.token_bytes()
 
 
 @app.route("/")
@@ -23,7 +25,7 @@ def hello():
         )
 
 
-@app.route("/acs/", name="acs", methods=["POST"])
+@app.route("/acs/", methods=["POST"])
 def acs():
     raw_response = request.form["SAMLResponse"].encode("ascii")
     try:
