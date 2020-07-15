@@ -11,14 +11,14 @@ from .internal.saml import build_saml_request
 def get_request_redirect_url(
     *,
     saml_endpoint: str,
-    issuer: str,
+    expected_audience: str,
     acs_url: str,
     force_reauthentication: bool = False,
     request_id: Optional[str] = None,
     relay_state: Optional[str] = None,
 ) -> str:
     request_xml = build_saml_request(
-        issuer=issuer,
+        issuer=expected_audience,
         acs_url=acs_url,
         request_id=request_id or secrets.token_urlsafe(),
         force_reauthentication=force_reauthentication,

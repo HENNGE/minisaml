@@ -9,7 +9,12 @@ from lxml.etree import QName
 from minisignxml.errors import ElementNotFound
 from minisignxml.verify import extract_verified_element
 
-from .errors import MalformedSAMLResponse, ResponseExpired, ResponseTooEarly
+from .errors import (
+    AudienceMismatch,
+    MalformedSAMLResponse,
+    ResponseExpired,
+    ResponseTooEarly,
+)
 from .internal.constants import *
 from .internal.namespaces import NAMESPACE_MAP
 from .internal.saml import saml_to_datetime
@@ -38,7 +43,9 @@ class Response:
         return {attr.name: attr.value for attr in self.attributes}
 
 
-def validate_response(*, data: bytes, certificate: Certificate) -> Response:
+def validate_response(
+    *, data: bytes, certificate: Certificate, expected_audience: str
+) -> Response:
     xml = base64.b64decode(data)
     element = extract_verified_element(xml=xml, certificate=certificate)
     if element.tag == QName(NAMES_SAML2_PROTOCOL, "Response"):
@@ -69,6 +76,12 @@ def validate_response(*, data: bytes, certificate: Certificate) -> Response:
     audience = find_or_raise(
         conditions, "./saml:AudienceRestriction/saml:Audience"
     ).text
+
+    if audience != expected_audience:
+        raise AudienceMismatch(
+            received_audience=audience, expected_audience=expected_audience
+        )
+
     raw_session_not_on_or_after = find_or_raise(
         assertion, "./saml:AuthnStatement"
     ).attrib.get("SessionNotOnOrAfter", None)

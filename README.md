@@ -15,7 +15,7 @@ from minisaml.request import get_request_redirect_url
 
 url = get_request_redirect_url(
     saml_endpoint='https://your-idp.invalid/sso-endpoint/', 
-    issuer='Your SAML Issuer', 
+    expected_audience='Your SAML Issuer', 
     acs_url='https://you.web-site.invalid/saml/acs/'
 )
 
@@ -35,7 +35,7 @@ saml_response = get_SAMLResponse_form_data_as_bytes()
 certificate = ...
 
 try:
-    response = validate_response(data=saml_response, certificate=certificate)
+    response = validate_response(data=saml_response, certificate=certificate, expected_audience='Your SAML Issuer')
 except:
     handle_invalid_response_somehow()
 
