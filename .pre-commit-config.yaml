@@ -7,7 +7,7 @@ repos:
       language: python_venv
       language_version: python3
 -   repo: https://github.com/timothycrosley/isort
-    rev: 4.3.21-2
+    rev: 5.1.0
     hooks:
     - id: isort
       language: python_venv

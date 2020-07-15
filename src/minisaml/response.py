@@ -5,7 +5,6 @@ from typing import List, Mapping, Optional
 
 from cryptography.x509 import Certificate
 from lxml.etree import QName
-
 from minisignxml.errors import ElementNotFound
 from minisignxml.verify import extract_verified_element
 

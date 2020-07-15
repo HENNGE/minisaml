@@ -1,5 +1,4 @@
 from lxml.etree import _Element as Element
-
 from minisignxml.internal import utils
 
 from .namespaces import NAMESPACE_MAP

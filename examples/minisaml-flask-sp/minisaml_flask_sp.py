@@ -6,9 +6,10 @@ from typing import Union
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509 import load_pem_x509_certificate
 from flask import Flask, redirect, request, session, url_for
+from werkzeug import Response
+
 from minisaml.request import get_request_redirect_url
 from minisaml.response import validate_response
-from werkzeug import Response
 
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes()
