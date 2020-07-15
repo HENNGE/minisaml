@@ -16,3 +16,5 @@ jobs:
           $HOME/.poetry/bin/poetry run black --check
       - run:
           $HOME/.poetry/bin/poetry run isort --check-only
+      - run:
+          $HOME/.poetry/bin/poetry run mypy src

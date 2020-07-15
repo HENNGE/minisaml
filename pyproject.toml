@@ -6,7 +6,7 @@ authors = ["Jonas Obrist <jonas.obrist@hde.co.jp>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-minisignxml = {"git" = "git@github.com:HENNGE/minisignxml.git"}
+minisignxml = {git = "git@github.com:HENNGE/minisignxml.git", branch = "main"}
 lxml = "^4.4.1"
 yarl = "^1.4.2"
 
@@ -16,6 +16,7 @@ isort = "^4.3.21"
 black = "^19.10b0"
 cryptography = "^2.8"
 flask = "^1.1.2"
+mypy = "^0.782"
 
 [tool.isort]
 line_length = "88"
