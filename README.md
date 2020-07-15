@@ -2,7 +2,7 @@
 
 
 Absolutely minimalistic SAML 2 client. Does not support the full SAML 2 specification, on purpose.
-Basically it only supports requests via HTTP Redirect and responses via HTTP POST.
+It only supports requests via HTTP Redirect and responses via HTTP POST.
 
 
 ## Usage

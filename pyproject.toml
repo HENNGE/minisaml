@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "minisaml"
-version = "2019.1"
+version = "2020.7b0"
 description = "Minimal SAML2 client"
 authors = ["Jonas Obrist <jonas.obrist@hde.co.jp>"]
 
@@ -15,6 +15,7 @@ pytest-freezegun = "^0.3.0"
 isort = "^4.3.21"
 black = "^19.10b0"
 cryptography = "^2.8"
+flask = "^1.1.2"
 
 [tool.isort]
 line_length = "88"

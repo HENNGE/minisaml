@@ -20,7 +20,7 @@ def hello():
         acs_url = url_for("acs", _external=True)
         return redirect(
             get_request_redirect_url(
-                saml_endpoint=endpoint, issuer=issuer, acs_url=acs_url
+                saml_endpoint=endpoint, expected_audience=AUDIENCE, acs_url=acs_url
             )
         )
 
@@ -29,7 +29,9 @@ def hello():
 def acs():
     raw_response = request.form["SAMLResponse"].encode("ascii")
     try:
-        response = validate_response(data=raw_response, certificate=certificate)
+        response = validate_response(
+            data=raw_response, certificate=certificate, expected_audience=AUDIENCE
+        )
     except Exception as e:
         return f"Invalid SAML Response {e!r}"
     session["user"] = response.name_id
@@ -54,10 +56,10 @@ except KeyError:
     sys.exit(1)
 
 try:
-    issuer = os.environ["MINISAML_ISSUER"]
+    AUDIENCE = os.environ["MINISAML_AUDIENCE"]
 except KeyError:
     print(
-        "You must set the MINISAML_ISSUER environment variable to point to Issuer value for your IdP"
+        "You must set the MINISAML_AUDIENCE environment variable to point to Issuer value for your IdP"
     )
     sys.exit(1)
 

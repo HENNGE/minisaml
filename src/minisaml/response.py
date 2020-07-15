@@ -47,6 +47,7 @@ def validate_response(
     *, data: bytes, certificate: Certificate, expected_audience: str
 ) -> Response:
     xml = base64.b64decode(data)
+    print(xml)
     element = extract_verified_element(xml=xml, certificate=certificate)
     if element.tag == QName(NAMES_SAML2_PROTOCOL, "Response"):
         assertion = find_or_raise(element, "./saml:Assertion")

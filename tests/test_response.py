@@ -5,7 +5,7 @@ import pytest
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509 import load_pem_x509_certificate
 
-from minisaml.errors import ResponseExpired, ResponseTooEarly
+from minisaml.errors import AudienceMismatch, ResponseExpired, ResponseTooEarly
 from minisaml.response import validate_response
 
 
@@ -32,7 +32,9 @@ def read():
 def test_saml_response_ok(read):
     data = read("response.xml.b64")
     certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
-    response = validate_response(data=data, certificate=certificate)
+    response = validate_response(
+        data=data, certificate=certificate, expected_audience="https://sp.invalid"
+    )
     assert response.name_id == "user.name"
     assert response.audience == "https://sp.invalid"
     assert response.in_response_to == "8QmO2elg5T6-GPgr7dZI7v27M-wvMXc1k76B6jleNmM"
@@ -56,7 +58,11 @@ def test_saml_response_too_early(read):
     data = read("response.xml.b64")
     certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
     with pytest.raises(ResponseTooEarly):
-        validate_response(data=data, certificate=certificate)
+        validate_response(
+            data=data,
+            certificate=certificate,
+            expected_audience="https://sp.invalid.com",
+        )
 
 
 @pytest.mark.freeze_time(
@@ -74,4 +80,28 @@ def test_saml_response_expired(read):
     data = read("response.xml.b64")
     certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
     with pytest.raises(ResponseExpired):
-        validate_response(data=data, certificate=certificate)
+        validate_response(
+            data=data, certificate=certificate, expected_audience="https://sp.invalid"
+        )
+
+
+@pytest.mark.freeze_time(
+    datetime.datetime(
+        year=2020,
+        month=1,
+        day=16,
+        hour=14,
+        minute=32,
+        second=32,
+        tzinfo=datetime.timezone.utc,
+    )
+)
+def test_saml_response_audience_mismatch(read):
+    data = read("response.xml.b64")
+    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+    with pytest.raises(AudienceMismatch):
+        validate_response(
+            data=data,
+            certificate=certificate,
+            expected_audience="https://other.sp.invalid",
+        )
