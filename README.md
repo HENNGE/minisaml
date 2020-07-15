@@ -1,6 +1,10 @@
 # MiniSAML
 
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![CircleCI](https://circleci.com/gh/HENNGE/minisaml.svg?style=svg)](https://circleci.com/gh/HENNGE/minisaml)
+
+
 Absolutely minimalistic SAML 2 client. Does not support the full SAML 2 specification, on purpose.
 It only supports requests via HTTP Redirect and responses via HTTP POST.
 
