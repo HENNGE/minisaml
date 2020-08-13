@@ -24,7 +24,7 @@ from .internal.utils import find_or_raise
 class Attribute:
     name: str
     value: str
-    format: str
+    format: Optional[str]
     extra_attributes: Mapping[str, str]
 
 
@@ -97,7 +97,7 @@ def validate_response(
             value = find_or_raise(attribute, "./saml:AttributeValue").text
             extra_attributes = {k: v for k, v in attribute.attrib.items()}
             name = extra_attributes.pop("Name")
-            format = extra_attributes.pop("NameFormat")
+            format = extra_attributes.pop("NameFormat", None)
             attributes.append(
                 Attribute(
                     name=name,
