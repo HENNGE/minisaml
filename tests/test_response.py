@@ -3,7 +3,10 @@ from pathlib import Path
 
 import pytest
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
+from minisignxml.config import VerifyConfig
+from minisignxml.errors import UnsupportedAlgorithm
 
 from minisaml.errors import AudienceMismatch, ResponseExpired, ResponseTooEarly
 from minisaml.response import validate_response
@@ -104,4 +107,30 @@ def test_saml_response_audience_mismatch(read):
             data=data,
             certificate=certificate,
             expected_audience="https://other.sp.invalid",
+        )
+
+
+@pytest.mark.freeze_time(
+    datetime.datetime(
+        year=2020,
+        month=1,
+        day=16,
+        hour=14,
+        minute=32,
+        second=32,
+        tzinfo=datetime.timezone.utc,
+    )
+)
+def test_saml_response_algorithm_mismatch(read):
+    data = read("response.xml.b64")
+    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+    with pytest.raises(UnsupportedAlgorithm):
+        validate_response(
+            data=data,
+            certificate=certificate,
+            expected_audience="https://other.sp.invalid",
+            signature_verification_config=VerifyConfig(
+                allowed_digest_method={hashes.SHA1},
+                allowed_signature_method={hashes.SHA1},
+            ),
         )

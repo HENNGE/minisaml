@@ -1,10 +1,11 @@
 import base64
 import datetime
 from dataclasses import dataclass
-from typing import List, Mapping, Optional
+from typing import Dict, List, Optional, Union
 
 from cryptography.x509 import Certificate
 from lxml.etree import QName
+from minisignxml.config import VerifyConfig
 from minisignxml.errors import ElementNotFound
 from minisignxml.verify import extract_verified_element
 
@@ -25,7 +26,7 @@ class Attribute:
     name: str
     value: str
     format: Optional[str]
-    extra_attributes: Mapping[str, str]
+    extra_attributes: Dict[str, str]
 
 
 @dataclass(frozen=True)
@@ -38,16 +39,23 @@ class Response:
     in_response_to: Optional[str]
 
     @property
-    def attrs(self) -> Mapping[str, str]:
+    def attrs(self) -> Dict[str, str]:
         return {attr.name: attr.value for attr in self.attributes}
 
 
 def validate_response(
-    *, data: bytes, certificate: Certificate, expected_audience: str
+    *,
+    data: Union[bytes, str],
+    certificate: Certificate,
+    expected_audience: str,
+    signature_verification_config: Optional[VerifyConfig] = None
 ) -> Response:
     xml = base64.b64decode(data)
-    print(xml)
-    element = extract_verified_element(xml=xml, certificate=certificate)
+    if not signature_verification_config:
+        signature_verification_config = VerifyConfig.default()
+    element = extract_verified_element(
+        xml=xml, certificate=certificate, config=signature_verification_config
+    )
     if element.tag == QName(NAMES_SAML2_PROTOCOL, "Response"):
         assertion = find_or_raise(element, "./saml:Assertion")
     elif element.tag == QName(NAMES_SAML2_ASSERTION, "Assertion"):
