@@ -13,8 +13,8 @@ jobs:
       - run:
           $HOME/.poetry/bin/poetry run pytest
       - run:
-          $HOME/.poetry/bin/poetry run black --check
+          $HOME/.poetry/bin/poetry run black --check src tests
       - run:
-          $HOME/.poetry/bin/poetry run isort --check-only
+          $HOME/.poetry/bin/poetry run isort --check-only src tests
       - run:
           $HOME/.poetry/bin/poetry run mypy src
