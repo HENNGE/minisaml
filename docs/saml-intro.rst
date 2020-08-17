@@ -53,7 +53,7 @@ Key concepts and terms
 
     Audience
         Identifier of a :term:`Service Provider`. This is used by the :term:`Identity Provider` to
-        distinguish different :term:`Service Provider`.
+        distinguish different :term:`Service Providers<Service Provider>`.
         The specification also calls this the *Issuer* of a :term:`Service Provider`, but to prevent confusion with *Issuer* of the :term:`Identity Provider`, MiniSAML refers to this as :term:`Audience`.
         :term:`Audience` is called *Entity ID* by some :term:`Identity Providers<Identity Provider>`.
 
@@ -78,7 +78,8 @@ document.
 4. If the authentication on the :term:`Identity Provider` is successful, the :term:`Identity Provider` redirects
    the user back to the :term:`Service Provider` by sending a HTTP POST request to the :term:`Assertion Consumer Service`
    of the :term:`Service Provider`
-5. The :term:`Service Provider` parses the :term:`SAML Response` and ensures that it is from the :term:`Identity Provider`.
+5. The :term:`Service Provider` parses the :term:`SAML Response`, validates that it is from the :term:`Identity Provider`
+   and optionally validates the :term:`Relay State` and ``request_id``.
 
 .. mermaid::
 
@@ -92,7 +93,7 @@ document.
         IdP->>U: Authenticate
         IdP->>SP: SAML Response
 
-Some :term:`Service Provider` also support what is called *Identity Provider Initiated SSO*, in which case the user
+Some :term:`Service Providers<Service Provider>` also support what is called *Identity Provider Initiated SSO*, in which case the user
 directly access the :term:`Service Provider` from the :term:`Identity Provider` and there is no :term:`SAML Request`
 involved, only a :term:`SAML Response`.
 
