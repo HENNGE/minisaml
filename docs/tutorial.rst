@@ -27,7 +27,7 @@ MiniSAML needs some information about the :term:`Identity Provider` and your own
 * The :term:`Audience` your :term:`Service Provider` uses.
 * The SAML Certificate your :term:`Identity Provider` uses. MiniSAML only supports RSA based certificates.
 * The algorithms used by the :term:`Identity Provider` to sign the :term:`SAML Response`.
-  By default MiniSAML only allows SHA-256 for both of those. If your :term:`Identity Provider` uses a different
+  By default MiniSAML only allows SHA-256. If your :term:`Identity Provider` uses a different
   algorithm, you have to opt-in explicitly.
 * The absolute URL to the :term:`Assertion Consumer Service` in your application.
 
