@@ -13,7 +13,7 @@ API Reference
     :param expected_audience: :term:`Audience` of your :term:`Identity Provider`.
     :param acs_url: Absolute URL to the :term:`Assertion Consumer Service` handler of your application.
     :param force_reauthentication: Request re-authentication of the user, even if the user is already authenticated on the :term:`Identity Provider`. Not all :term:`Identity Providers<Identity Provider>` support this option.
-    :param request_id: To prevent :term:`Identity Provider` initiated SSO, you can specify a unique request ID. It is your own responsibility to verify this when validating :term:`SAML Responses<SAML Response>`. If you don't provide a request ID, a random one will be generated.
+    :param request_id: To prevent :term:`Identity Provider` initiated SSO, you can specify a unique request ID. It is your own responsibility to verify this when validating :term:`SAML Responses<SAML Response>`. If you don't provide a request ID, a random value will be used.
     :param relay_state: Any :term:`Relay State` you want to include in the :term:`SAML Request`.
     :return: Absolute URL to which the user should be redirected to using a temporary HTTP redirect.
 
