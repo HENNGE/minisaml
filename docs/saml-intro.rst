@@ -70,7 +70,7 @@ Before using SAML, the :term:`Service Provider` has to be registered with the :t
 is done differs from :term:`Identity Provider` to :term:`Identity Provider` and therefore is out of scope for this
 document.
 
-1. A user attempts to access a :term:`Service Provider` and is required to authenticate.
+1. A user attempts to access a :term:`Service Provider` and needs to be authenticated.
 2. The :term:`Service Provider` redirects the user to the :term:`Identity Provider` with a :term:`SAML Request`.
 3. The :term:`Identity Provider` parses the :term:`SAML Request`, verifies the :term:`Service Provider` using the
    :term:`Audience` specified in the :term:`SAML Request`, then authenticates the user, for example by asking them
