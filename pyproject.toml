@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "minisaml"
-version = "20.8b1"
+version = "20.8b2"
 description = "Minimal SAML2 client"
 authors = ["Jonas Obrist <jonas.obrist@hennge.com>"]
 license = "Apache-2.0"
@@ -17,7 +17,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-minisignxml = {version = "20.7b0", allow-prereleases = true}
+minisignxml = {version = "20.8b0", allow-prereleases = true}
 lxml = "^4.4.1"
 yarl = "^1.4.2"
 

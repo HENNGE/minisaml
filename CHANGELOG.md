@@ -1,5 +1,9 @@
 # Changelog
 
+## 20.8b2
+
+* Fix minisignxml dependency specifier
+
 ## 20.8b1
 
 * Support SAML signatures with non-SHA256 digest and signinig algorithms
