@@ -28,7 +28,7 @@ API Reference
     :param certificate: Certificate used by the :term:`Identity Provider`.
     :param expected_audience: :term:`Audience` of your :term:`Identity Provider`.
     :param signature_verification_config: If the :term:`Identity Provider` uses an algorithm other than SHA-256 for
-        response signing, you have to enable them by passing an appropriate :py:class:`minisignxml.config.VerifyConfig` instance.
+        response signing, you have to enable it by passing an appropriate :py:class:`minisignxml.config.VerifyConfig` instance.
     :returns: Validated response.
     :raises minisaml.errors.MalformedSAMLResponse:
     :raises minisaml.errors.ResponseExpired:
