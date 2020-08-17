@@ -48,11 +48,9 @@ def validate_response(
     data: Union[bytes, str],
     certificate: Certificate,
     expected_audience: str,
-    signature_verification_config: Optional[VerifyConfig] = None
+    signature_verification_config: VerifyConfig = VerifyConfig.default()
 ) -> Response:
     xml = base64.b64decode(data)
-    if not signature_verification_config:
-        signature_verification_config = VerifyConfig.default()
     element = extract_verified_element(
         xml=xml, certificate=certificate, config=signature_verification_config
     )
