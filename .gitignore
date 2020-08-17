@@ -4,3 +4,6 @@ __pycache__
 dist
 pip-wheel-metadata
 poetry.lock
+docs/_build
+docs/_static
+docs/_templates
