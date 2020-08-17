@@ -75,7 +75,7 @@ API Reference
     .. py:attribute:: attrs
         :type: Dict[str, str]
 
-        The attributes from :py:attr:`minisaml.response.Response.attributes` as a simple dictionary.
+        The attributes from :py:attr:`minisaml.response.Response.attributes` as a dictionary.
         If the attributes contain multiple attributes with the same name, this dictionary will only
         hold one of them, use :py:attr:`minisaml.response.Response.attributes` if there could be multiple
         attributes with the same name.
