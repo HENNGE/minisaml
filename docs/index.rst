@@ -7,7 +7,7 @@ Welcome to MiniSAML documentation!
 ==================================
 
 MiniSAML is a Python library which allows building SAML 2 Service Providers easily.
-It deliberately implements only a sub set of the SAML 2 specification, focusing on
+It deliberately implements only a subset of the SAML 2 specification, focusing on
 the parts that are most likely to be encountered in the real world, in order to offer
 a better API for developers and make it difficult to do the wrong thing.
 
