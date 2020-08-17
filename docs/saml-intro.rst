@@ -77,7 +77,7 @@ document.
    for a username and password.
 4. If the authentication on the :term:`Identity Provider` is successful, the :term:`Identity Provider` redirects
    the user back to the :term:`Service Provider` by sending a HTTP POST request to the :term:`Assertion Consumer Service`
-   on the :term:`Service Provider`
+   of the :term:`Service Provider`
 5. The :term:`Service Provider` parses the :term:`SAML Response` and ensures that it is from the :term:`Identity Provider`.
 
 .. mermaid::
