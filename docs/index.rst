@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to MiniSAML's documentation!
-====================================
+Welcome to MiniSAML documentation!
+==================================
 
 MiniSAML is a Python library which allows building SAML 2 Service Providers easily.
 It deliberately implements only a sub set of the SAML 2 specification, focusing on
