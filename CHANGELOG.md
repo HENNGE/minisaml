@@ -1,5 +1,9 @@
 # Changelog
 
+## 20.8b3
+
+* Support sub-second resolution for datetimes in SAML responses.
+
 ## 20.8b2
 
 * Fix minisignxml dependency specifier
