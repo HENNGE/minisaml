@@ -11,6 +11,8 @@ def datetime_to_saml(t: datetime.datetime) -> str:
 
 
 def saml_to_datetime(s: str) -> datetime.datetime:
+    if "." in s:
+        return datetime.datetime.strptime(s, DATE_TIME_FORMAT_FRACTIONAL)
     return datetime.datetime.strptime(s, DATE_TIME_FORMAT)
 
 

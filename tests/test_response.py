@@ -5,6 +5,7 @@ import pytest
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
+from defusedxml.lxml import fromstring
 from minisignxml.config import VerifyConfig
 from minisignxml.errors import UnsupportedAlgorithm
 
@@ -133,4 +134,42 @@ def test_saml_response_algorithm_mismatch(read):
                 allowed_digest_method={hashes.SHA1},
                 allowed_signature_method={hashes.SHA1},
             ),
+        )
+
+
+@pytest.mark.freeze_time(
+    datetime.datetime(
+        year=2013, month=3, day=18, hour=8, minute=48, second=15, microsecond=127000
+    )
+)
+def test_azure_ad_response_parsing(read, monkeypatch):
+    xml = read("azure_ad_unsigned.xml")
+    tree = fromstring(xml)
+
+    def null_extract(**kwargs):
+        return tree
+
+    monkeypatch.setattr("minisaml.response.extract_verified_element", null_extract)
+    response = validate_response(
+        data=xml, certificate=None, expected_audience="https://www.contoso.com"
+    )
+    assert response.in_response_to == "id758d0ef385634593a77bdf7e632984b6"
+
+
+@pytest.mark.freeze_time(
+    datetime.datetime(
+        year=2013, month=3, day=18, hour=8, minute=48, second=15, microsecond=128000
+    )
+)
+def test_azure_ad_response_microsecond_outdated(read, monkeypatch):
+    xml = read("azure_ad_unsigned.xml")
+    tree = fromstring(xml)
+
+    def null_extract(**kwargs):
+        return tree
+
+    monkeypatch.setattr("minisaml.response.extract_verified_element", null_extract)
+    with pytest.raises(ResponseExpired):
+        validate_response(
+            data=xml, certificate=None, expected_audience="https://www.contoso.com"
         )
