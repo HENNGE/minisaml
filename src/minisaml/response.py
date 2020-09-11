@@ -1,10 +1,10 @@
 import base64
 import datetime
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
+from typing import Dict, Iterable, List, Optional, Union
 
 from cryptography.x509 import Certificate
-from lxml.etree import QName
+from lxml.etree import QName, _Element as Element
 from minisignxml.config import VerifyConfig
 from minisignxml.errors import ElementNotFound
 from minisignxml.verify import extract_verified_element
@@ -24,9 +24,13 @@ from .internal.utils import find_or_raise
 @dataclass(frozen=True)
 class Attribute:
     name: str
-    value: str
+    values: List[str]
     format: Optional[str]
     extra_attributes: Dict[str, str]
+
+    @property
+    def value(self) -> Optional[str]:
+        return self.values[0] if self.values else None
 
 
 @dataclass(frozen=True)
@@ -39,7 +43,7 @@ class Response:
     in_response_to: Optional[str]
 
     @property
-    def attrs(self) -> Dict[str, str]:
+    def attrs(self) -> Dict[str, Optional[str]]:
         return {attr.name: attr.value for attr in self.attributes}
 
 
@@ -98,22 +102,14 @@ def validate_response(
 
     try:
         attribute_statement = find_or_raise(assertion, "./saml:AttributeStatement")
-        attributes = []
-        for attribute in attribute_statement.findall("./saml:Attribute", NAMESPACE_MAP):
-            value = find_or_raise(attribute, "./saml:AttributeValue").text
-            extra_attributes = {k: v for k, v in attribute.attrib.items()}
-            name = extra_attributes.pop("Name")
-            format = extra_attributes.pop("NameFormat", None)
-            attributes.append(
-                Attribute(
-                    name=name,
-                    value=value,
-                    format=format,
-                    extra_attributes=extra_attributes,
-                )
-            )
     except ElementNotFound:
-        attributes = []
+        attribute_statement = None
+
+    attributes = (
+        list(gather_attributes(attribute_statement))
+        if attribute_statement is not None
+        else []
+    )
 
     return Response(
         issuer=issuer,
@@ -123,3 +119,17 @@ def validate_response(
         session_not_on_or_after=session_not_on_or_after,
         in_response_to=in_response_to,
     )
+
+
+def gather_attributes(attribute_statement: Element) -> Iterable[Attribute]:
+    for attribute in attribute_statement.findall("./saml:Attribute", NAMESPACE_MAP):
+        values = [
+            value.text
+            for value in attribute.findall("./saml:AttributeValue", NAMESPACE_MAP)
+        ]
+        extra_attributes = {k: v for k, v in attribute.attrib.items()}
+        name = extra_attributes.pop("Name")
+        format = extra_attributes.pop("NameFormat", None)
+        yield Attribute(
+            name=name, values=values, format=format, extra_attributes=extra_attributes,
+        )

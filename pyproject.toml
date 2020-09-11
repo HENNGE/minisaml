@@ -27,7 +27,7 @@ sphinxcontrib-mermaid = { version = "^0.4.0", optional = true }
 docs = ["sphinx", "sphinxcontrib-mermaid"]
 
 [tool.poetry.dev-dependencies]
-pytest-freezegun = "^0.3.0"
+pytest-freezegun = "^0.4.2"
 isort = "^5.1.0"
 black = "^19.10b0"
 cryptography = "^2.8"

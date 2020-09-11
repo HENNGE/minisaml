@@ -1,5 +1,4 @@
 import datetime
-from pathlib import Path
 
 import pytest
 from cryptography.hazmat.backends import default_backend
@@ -10,16 +9,7 @@ from minisignxml.config import VerifyConfig
 from minisignxml.errors import UnsupportedAlgorithm
 
 from minisaml.errors import AudienceMismatch, ResponseExpired, ResponseTooEarly
-from minisaml.response import validate_response
-
-
-@pytest.fixture
-def read():
-    def reader(filename: str) -> bytes:
-        with Path(__file__).parent.joinpath(filename).open("rb") as fobj:
-            return fobj.read()
-
-    return reader
+from minisaml.response import Attribute, gather_attributes, validate_response
 
 
 @pytest.mark.freeze_time(
@@ -173,3 +163,87 @@ def test_azure_ad_response_microsecond_outdated(read, monkeypatch):
         validate_response(
             data=xml, certificate=None, expected_audience="https://www.contoso.com"
         )
+
+
+@pytest.mark.parametrize(
+    "filename,attributes,values",
+    [
+        (
+            "attrs/single.xml",
+            [
+                Attribute(
+                    name="AttrName",
+                    values=["AttrValue"],
+                    format=None,
+                    extra_attributes={},
+                )
+            ],
+            ["AttrValue"],
+        ),
+        (
+            "attrs/multi.xml",
+            [
+                Attribute(
+                    name="AttrName1",
+                    values=["AttrValue1"],
+                    format=None,
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="AttrName2",
+                    values=["AttrValue2"],
+                    format=None,
+                    extra_attributes={},
+                ),
+            ],
+            ["AttrValue1", "AttrValue2"],
+        ),
+        (
+            "attrs/multi-value.xml",
+            [
+                Attribute(
+                    name="AttrName",
+                    values=["AttrValue1", "AttrValue2"],
+                    format=None,
+                    extra_attributes={},
+                )
+            ],
+            ["AttrValue1"],
+        ),
+        (
+            "attrs/no-value.xml",
+            [Attribute(name="AttrName", values=[], format=None, extra_attributes={})],
+            [None],
+        ),
+        (
+            "attrs/format.xml",
+            [
+                Attribute(
+                    name="AttrName",
+                    values=[],
+                    format="name-format",
+                    extra_attributes={},
+                )
+            ],
+            [None],
+        ),
+        (
+            "attrs/format-extra-attrs.xml",
+            [
+                Attribute(
+                    name="AttrName",
+                    values=[],
+                    format="name-format",
+                    extra_attributes={"ExtraAttribute": "Extra Attribute Value"},
+                )
+            ],
+            [None],
+        ),
+    ],
+)
+def test_attributes(filename, attributes, values, read):
+    xml = read(filename)
+    tree = fromstring(xml)
+    result = list(gather_attributes(tree))
+    assert result == attributes
+    assert [attribute.value for attribute in result] == values
