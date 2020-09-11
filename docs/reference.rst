@@ -92,9 +92,15 @@ API Reference
         Name of the attribute
 
     .. py:attribute:: value
-        :type: str
+        :type: Optional[str]
 
-        Value of the attribute
+        Value of the attribute, if it has one. If the attribute has multiple values, the first one
+        is returned. See :py:attr:`minisaml.response.Attribute.values` to get all values.
+
+    .. py:attribute:: values
+        :type: List[str]
+
+        All values for this attribute, if any are given.
 
     .. py:attribute:: format
         :type: Optional[str]

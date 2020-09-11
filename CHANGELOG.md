@@ -1,5 +1,12 @@
 # Changelog
 
+## next (unreleased)
+
+* **Breaking** `minisaml.repsonse.Attribute.value` is now of type `Optional[str]`
+* **Breaking** `minisaml.response.Response.attrs` is now of type `Dict[str, Optional[str]]`
+* Improved support for Attribute Statements. Attributes with multiple values or no values are now supported.
+* Added `minisaml.response.Attribute.values` (`List[str]`)
+
 ## 20.8b3
 
 * Support sub-second resolution for datetimes in SAML responses.
