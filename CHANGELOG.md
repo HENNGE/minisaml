@@ -1,11 +1,12 @@
 # Changelog
 
-## next (unreleased)
+## 20.9b1
 
 * **Breaking** `minisaml.repsonse.Attribute.value` is now of type `Optional[str]`
 * **Breaking** `minisaml.response.Response.attrs` is now of type `Dict[str, Optional[str]]`
 * Improved support for Attribute Statements. Attributes with multiple values or no values are now supported.
 * Added `minisaml.response.Attribute.values` (`List[str]`)
+* Fixed incorrect Base64 encoding of SAML Requests.
 
 ## 20.8b3
 
