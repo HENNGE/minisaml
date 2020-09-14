@@ -239,6 +239,156 @@ def test_azure_ad_response_microsecond_outdated(read, monkeypatch):
             ],
             [None],
         ),
+        (
+            "attrs/aad1.xml",
+            [
+                Attribute(
+                    name="http://schemas.microsoft.com/identity/claims/tenantid",
+                    values=["78c90aec-8019-47bf-88cb-5e561d975248"],
+                    format=None,
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="http://schemas.microsoft.com/identity/claims/objectidentifier",
+                    values=["5b1141c1-a3d9-41f0-a51e-a3a5feb8f504"],
+                    format=None,
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="http://schemas.microsoft.com/identity/claims/identityprovider",
+                    values=[
+                        "https://sts.windows.net/78c90aec-8019-47bf-88cb-5e561d975248/"
+                    ],
+                    format=None,
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="http://schemas.microsoft.com/claims/authnmethodsreferences",
+                    values=[
+                        "http://schemas.microsoft.com/ws/2008/06/identity/authenticationmethod/password",
+                        "http://schemas.microsoft.com/claims/multipleauthn",
+                    ],
+                    format=None,
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="http://schemas.microsoft.com/ws/2008/06/identity/claims/wids",
+                    values=["b79fbf4d-3ef9-4689-8143-76b194e85509"],
+                    format=None,
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="emailaddress",
+                    values=["r.k.test@sunyocc.edu"],
+                    format=None,
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="givenname", values=["Bob"], format=None, extra_attributes={}
+                ),
+                Attribute(
+                    name="surname",
+                    values=["Kras test"],
+                    format=None,
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="uid", values=["r.k.test"], format=None, extra_attributes={}
+                ),
+                Attribute(
+                    name="occid", values=["1234567"], format=None, extra_attributes={}
+                ),
+                Attribute(
+                    name="upn",
+                    values=["r.k.test@sunyocc.edu"],
+                    format=None,
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="groups",
+                    values=[
+                        "ITDept-ALL",
+                        "ITDept-InfrastructureOnly",
+                        "drupal_editors",
+                    ],
+                    format=None,
+                    extra_attributes={},
+                ),
+            ],
+            [
+                "78c90aec-8019-47bf-88cb-5e561d975248",
+                "5b1141c1-a3d9-41f0-a51e-a3a5feb8f504",
+                "https://sts.windows.net/78c90aec-8019-47bf-88cb-5e561d975248/",
+                "http://schemas.microsoft.com/ws/2008/06/identity/authenticationmethod/password",
+                "b79fbf4d-3ef9-4689-8143-76b194e85509",
+                "r.k.test@sunyocc.edu",
+                "Bob",
+                "Kras test",
+                "r.k.test",
+                "1234567",
+                "r.k.test@sunyocc.edu",
+                "ITDept-ALL",
+            ],
+        ),
+        (
+            "attrs/aad2.xml",
+            [
+                Attribute(
+                    name="cn",
+                    values=["r.k.test"],
+                    format="urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="sn",
+                    values=["Kras test"],
+                    format="urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="givenName",
+                    values=["Bob"],
+                    format="urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="memberOf",
+                    values=[
+                        "CN=drupal_editors,OU=Security Groups,OU=OCCUsers,DC=sunyocc,DC=edu\n        ",
+                        "CN=ITDept-InfrastructureOnly,OU=Security\n            Groups,OU=OCCUsers,DC=sunyocc,DC=edu\n        ",
+                    ],
+                    format="urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="sAMAccountName",
+                    values=["r.k.test"],
+                    format="urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="userPrincipalName",
+                    values=["r.k.test@sunyocc.edu"],
+                    format="urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+                    extra_attributes={},
+                ),
+                Attribute(
+                    name="mail",
+                    values=["robert.kras@gmail.com"],
+                    format="urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+                    extra_attributes={},
+                ),
+            ],
+            [
+                "r.k.test",
+                "Kras test",
+                "Bob",
+                "CN=drupal_editors,OU=Security Groups,OU=OCCUsers,DC=sunyocc,DC=edu\n        ",
+                "r.k.test",
+                "r.k.test@sunyocc.edu",
+                "robert.kras@gmail.com",
+            ],
+        ),
     ],
 )
 def test_attributes(filename, attributes, values, read):
