@@ -25,9 +25,9 @@ def get_request_redirect_url(
     )
 
     query = {
-        "SAMLRequest": base64.urlsafe_b64encode(
-            zlib.compress(request_xml)[2:-4]
-        ).decode("utf-8")
+        "SAMLRequest": base64.b64encode(zlib.compress(request_xml)[2:-4]).decode(
+            "utf-8"
+        )
     }
     if relay_state is not None:
         query["RelayState"] = relay_state
