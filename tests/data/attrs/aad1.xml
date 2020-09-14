@@ -1,0 +1,41 @@
+<AttributeStatement xmlns="urn:oasis:names:tc:SAML:2.0:assertion">
+    <Attribute Name="http://schemas.microsoft.com/identity/claims/tenantid">
+        <AttributeValue>78c90aec-8019-47bf-88cb-5e561d975248</AttributeValue>
+    </Attribute>
+    <Attribute Name="http://schemas.microsoft.com/identity/claims/objectidentifier">
+        <AttributeValue>5b1141c1-a3d9-41f0-a51e-a3a5feb8f504</AttributeValue>
+    </Attribute>
+    <Attribute Name="http://schemas.microsoft.com/identity/claims/identityprovider">
+        <AttributeValue>https://sts.windows.net/78c90aec-8019-47bf-88cb-5e561d975248/</AttributeValue>
+    </Attribute>
+    <Attribute Name="http://schemas.microsoft.com/claims/authnmethodsreferences">
+        <AttributeValue>http://schemas.microsoft.com/ws/2008/06/identity/authenticationmethod/password</AttributeValue>
+        <AttributeValue>http://schemas.microsoft.com/claims/multipleauthn</AttributeValue>
+    </Attribute>
+    <Attribute Name="http://schemas.microsoft.com/ws/2008/06/identity/claims/wids">
+        <AttributeValue>b79fbf4d-3ef9-4689-8143-76b194e85509</AttributeValue>
+    </Attribute>
+    <Attribute Name="emailaddress">
+        <AttributeValue>r.k.test@sunyocc.edu</AttributeValue>
+    </Attribute>
+    <Attribute Name="givenname">
+        <AttributeValue>Bob</AttributeValue>
+    </Attribute>
+    <Attribute Name="surname">
+        <AttributeValue>Kras test</AttributeValue>
+    </Attribute>
+    <Attribute Name="uid">
+        <AttributeValue>r.k.test</AttributeValue>
+    </Attribute>
+    <Attribute Name="occid">
+        <AttributeValue>1234567</AttributeValue>
+    </Attribute>
+    <Attribute Name="upn">
+        <AttributeValue>r.k.test@sunyocc.edu</AttributeValue>
+    </Attribute>
+    <Attribute Name="groups">
+        <AttributeValue>ITDept-ALL</AttributeValue>
+        <AttributeValue>ITDept-InfrastructureOnly</AttributeValue>
+        <AttributeValue>drupal_editors</AttributeValue>
+    </Attribute>
+</AttributeStatement>

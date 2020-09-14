@@ -1,0 +1,5 @@
+<AttributeStatement xmlns="urn:oasis:names:tc:SAML:2.0:assertion">
+    <Attribute Name="AttrName">
+        <AttributeValue>AttrValue</AttributeValue>
+    </Attribute>
+</AttributeStatement>
