@@ -44,6 +44,29 @@ def test_saml_response_ok(read):
         day=16,
         hour=14,
         minute=32,
+        second=32,
+        tzinfo=datetime.timezone.utc,
+    )
+)
+def test_saml_response_ok_multi_cert(read):
+    data = read("response.xml.b64")
+    expected_cert = load_pem_x509_certificate(read("cert.pem"), default_backend())
+    other_cert = load_pem_x509_certificate(read("cert2.pem"), default_backend())
+    response = validate_response(
+        data=data,
+        certificate={expected_cert, other_cert},
+        expected_audience="https://sp.invalid",
+    )
+    assert response.certificate == expected_cert
+
+
+@pytest.mark.freeze_time(
+    datetime.datetime(
+        year=2020,
+        month=1,
+        day=16,
+        hour=14,
+        minute=32,
         second=30,
         tzinfo=datetime.timezone.utc,
     )
@@ -137,9 +160,11 @@ def test_azure_ad_response_parsing(read, monkeypatch):
     tree = fromstring(xml)
 
     def null_extract(**kwargs):
-        return tree
+        return tree, None
 
-    monkeypatch.setattr("minisaml.response.extract_verified_element", null_extract)
+    monkeypatch.setattr(
+        "minisaml.response.extract_verified_element_and_certificate", null_extract
+    )
     response = validate_response(
         data=xml, certificate=None, expected_audience="https://www.contoso.com"
     )
@@ -156,9 +181,11 @@ def test_azure_ad_response_microsecond_outdated(read, monkeypatch):
     tree = fromstring(xml)
 
     def null_extract(**kwargs):
-        return tree
+        return tree, None
 
-    monkeypatch.setattr("minisaml.response.extract_verified_element", null_extract)
+    monkeypatch.setattr(
+        "minisaml.response.extract_verified_element_and_certificate", null_extract
+    )
     with pytest.raises(ResponseExpired):
         validate_response(
             data=xml, certificate=None, expected_audience="https://www.contoso.com"

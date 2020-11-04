@@ -21,6 +21,6 @@ repos:
     -   id: mypy
         args: [--config-file=mypy.ini]
         additional_dependencies:
-          - 'minisignxml'
+          - 'minisignxml>=20.11b0'
           - 'yarl'
         exclude: tests|examples

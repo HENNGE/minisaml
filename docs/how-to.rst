@@ -25,3 +25,12 @@ To allow different algorithms, you have to provide the ``signature_verification_
 takes two arguments ``allowed_signature_method`` and ``allowed_digest_method`` both collections of types (not instances)
 of hash algorithms from :py:mod:`cryptography.hazmat.primitives.hashes`.
 
+
+Allow multiple certificates when validating a response
+======================================================
+
+In some cases, such as when an :term:`Identity Provider` changes their certificate, you might want
+:py:func:`minisaml.response.validate_response` to accept multiple certificates. To do so, instead of passing
+a single certificate object, pass it a collection of certificates. You may check the
+:py:attr:`minisaml.response.Response.certificate` attribute on the :py:class:`minisaml.response.Response` object
+returned by :py:func:`minisaml.response.validate_response` to check which certificate was actually used.
