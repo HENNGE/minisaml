@@ -1,5 +1,11 @@
 # Changelog
 
+## 20.11b0
+
+* Allow passing multiple certificates to `minisaml.repsonse.validate_response` to allow certificate rollover.
+* Added the certificate used in `minisaml.repsonse.validate_response` to the returned `minisaml.repsonse.Response`.
+* Minimum supported minisignxml version is now 20.11b0.
+
 ## 20.9b1
 
 * **Breaking** `minisaml.repsonse.Attribute.value` is now of type `Optional[str]`
