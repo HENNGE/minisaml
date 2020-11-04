@@ -25,7 +25,7 @@ API Reference
 .. autofunction:: minisaml.response.validate_response
 
     :param data: :term:`SAML Response` as extracted from the HTTP form field ``SAMLResponse``.
-    :param certificate: Certificate used by the :term:`Identity Provider`.
+    :param certificate: Certificate or collection of certificates used by the :term:`Identity Provider`.
     :param expected_audience: :term:`Audience` of your :term:`Identity Provider`.
     :param signature_verification_config: If the :term:`Identity Provider` uses an algorithm other than SHA-256 for
         response signing, you have to enable it by passing an appropriate :py:class:`minisignxml.config.VerifyConfig` instance.
@@ -78,6 +78,11 @@ API Reference
         The attributes from :py:attr:`minisaml.response.Response.attributes` as a dictionary.
         If the attributes contain multiple attributes with the same name, this dictionary will only
         hold one of them, use :py:attr:`minisaml.response.Response.attributes` instead.
+
+    .. py:attribute:: certificate
+        :type: cryptography.x509.Certificate
+
+        The certificate used to sign this response.
 
 
 ``minisaml.response.Attribute``
