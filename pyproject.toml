@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "minisaml"
-version = "20.9b1"
+version = "20.11b0"
 description = "Minimal SAML2 client"
 authors = ["Jonas Obrist <jonas.obrist@hennge.com>"]
 license = "Apache-2.0"
