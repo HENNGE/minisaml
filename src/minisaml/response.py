@@ -138,5 +138,8 @@ def gather_attributes(attribute_statement: Element) -> Iterable[Attribute]:
         name = extra_attributes.pop("Name")
         format = extra_attributes.pop("NameFormat", None)
         yield Attribute(
-            name=name, values=values, format=format, extra_attributes=extra_attributes,
+            name=name,
+            values=values,
+            format=format,
+            extra_attributes=extra_attributes,
         )
