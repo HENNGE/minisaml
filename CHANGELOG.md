@@ -1,5 +1,9 @@
 # Changelog
 
+## 22.4
+
+* Minimum supported minisignxml version is now 22.4.
+
 ## 20.11b0
 
 * Allow passing multiple certificates to `minisaml.repsonse.validate_response` to allow certificate rollover.
