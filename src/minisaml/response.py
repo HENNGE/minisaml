@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from typing import Collection, Dict, Iterable, List, Optional, Union
 
 from cryptography.x509 import Certificate
-from lxml.etree import QName, _Element as Element
+from lxml.etree import QName
+from lxml.etree import _Element as Element
 from minisignxml.config import VerifyConfig
 from minisignxml.errors import ElementNotFound
 from minisignxml.verify import extract_verified_element_and_certificate
@@ -48,12 +49,26 @@ class Response:
         return {attr.name: attr.value for attr in self.attributes}
 
 
+@dataclass(frozen=True)
+class TimeDriftLimits:
+    not_before_max_drift: datetime.timedelta
+    not_on_or_after_max_drift: datetime.timedelta
+
+    @classmethod
+    def none(cls) -> "TimeDriftLimits":
+        return cls(
+            not_before_max_drift=datetime.timedelta(),
+            not_on_or_after_max_drift=datetime.timedelta(),
+        )
+
+
 def validate_response(
     *,
     data: Union[bytes, str],
     certificate: Union[Certificate, Collection[Certificate]],
     expected_audience: str,
-    signature_verification_config: VerifyConfig = VerifyConfig.default()
+    signature_verification_config: VerifyConfig = VerifyConfig.default(),
+    allowed_time_drift: TimeDriftLimits = TimeDriftLimits.none(),
 ) -> Response:
     xml = base64.b64decode(data)
     certificates: Collection[Certificate]
@@ -84,10 +99,10 @@ def validate_response(
     not_before = saml_to_datetime(conditions.attrib["NotBefore"])
     not_on_or_after = saml_to_datetime(conditions.attrib["NotOnOrAfter"])
     now = datetime.datetime.utcnow()
-    if now < not_before:
-        raise ResponseTooEarly()
-    if now >= not_on_or_after:
-        raise ResponseExpired()
+    if now + allowed_time_drift.not_before_max_drift < not_before:
+        raise ResponseTooEarly(observed_time=now, not_before=not_before)
+    if now - allowed_time_drift.not_on_or_after_max_drift >= not_on_or_after:
+        raise ResponseExpired(observed_time=now, not_on_or_after=not_on_or_after)
 
     audience = find_or_raise(
         conditions, "./saml:AudienceRestriction/saml:Audience"

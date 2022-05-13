@@ -34,3 +34,14 @@ In some cases, such as when an :term:`Identity Provider` changes their certifica
 a single certificate object, pass it a collection of certificates. You may check the
 :py:attr:`minisaml.response.Response.certificate` attribute on the :py:class:`minisaml.response.Response` object
 returned by :py:func:`minisaml.response.validate_response` to check which certificate was actually used.
+
+
+Allow for inaccurate clocks
+===========================
+
+:term:`SAML Responses<SAML Response>` include two timestamps limiting the validity period
+of the response, ``NotBefore`` defines the lower bound and ``NotOnOrAfter`` defines the upper bound.
+Since the clocks of different computers are not always in perfect sync, minisaml allows you to define
+a maximum amount of inaccuracy for both of those values when validating responses. To do so,
+provide an instance if :py:class:`minisaml.response.TimeDriftLimits` as the ``allowed_time_drift`` argument
+to :py:func:`minisaml.response.validate_response`.

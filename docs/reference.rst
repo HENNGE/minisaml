@@ -26,9 +26,10 @@ API Reference
 
     :param data: :term:`SAML Response` as extracted from the HTTP form field ``SAMLResponse``.
     :param certificate: Certificate or collection of certificates used by the :term:`Identity Provider`.
-    :param expected_audience: :term:`Audience` of your :term:`Identity Provider`.
+    :param expected_audience str: :term:`Audience` of your :term:`Identity Provider`.
     :param signature_verification_config: If the :term:`Identity Provider` uses an algorithm other than SHA-256 for
         response signing, you have to enable it by passing an appropriate :py:class:`minisignxml.config.VerifyConfig` instance.
+    :param allowed_time_drift: Limits the amount of clock inaccuracy tolerated. Defaults to no inaccuracy allowed.
     :returns: Validated response.
     :raises minisaml.errors.MalformedSAMLResponse:
     :raises minisaml.errors.ResponseExpired:
@@ -116,3 +117,20 @@ API Reference
         :type: Dict[str, str]
 
         Extra XML attributes on the attribute element.
+
+
+``minisaml.response.TimeDriftLimits``
+=====================================
+
+.. py:class:: minisaml.response.TimeDriftLimits
+
+    .. py:attribute:: not_before_max_drift
+        :type: datetime.timedelta
+
+    .. py:attribute:: not_on_or_after_max_drift
+        :type: datetime.timedelta
+
+    .. py:method:: none()
+        :classmethod:
+
+        Returns an instance which allows for no drift.
