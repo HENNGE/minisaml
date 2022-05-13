@@ -36,6 +36,8 @@ a single certificate object, pass it a collection of certificates. You may check
 returned by :py:func:`minisaml.response.validate_response` to check which certificate was actually used.
 
 
+.. _inaccurate-clocks:
+
 Allow for inaccurate clocks
 ===========================
 
