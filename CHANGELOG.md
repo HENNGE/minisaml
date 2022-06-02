@@ -1,5 +1,12 @@
 # Changelog
 
+## 22.6
+
+* Added `allowed_time_drift` parameter to `minisaml.response.validate_response` to allow for clock inaccuracies when validating SAML responses.
+* `minisaml.errors.ResponseExpired` now stores both the observed time and the time limit of the SAML response as attributes on the exception.
+* `minisaml.errors.ResponseTooEarly` now stores both the observed time and the time limit of the SAML response as attributes on the exception.
+* Added more documentation, changed documentation theme.
+
 ## 22.4
 
 * Minimum supported minisignxml version is now 22.4.
