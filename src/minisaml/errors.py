@@ -1,3 +1,7 @@
+import datetime
+from dataclasses import dataclass
+
+
 class MiniSAMLError(Exception):
     pass
 
@@ -6,16 +10,19 @@ class MalformedSAMLResponse(MiniSAMLError):
     pass
 
 
+@dataclass
 class ResponseExpired(MiniSAMLError):
-    pass
+    observed_time: datetime.datetime
+    not_on_or_after: datetime.datetime
 
 
+@dataclass
 class ResponseTooEarly(MiniSAMLError):
-    pass
+    observed_time: datetime.datetime
+    not_before: datetime.datetime
 
 
+@dataclass
 class AudienceMismatch(MiniSAMLError):
-    def __init__(self, *, received_audience: str, expected_audience: str):
-        self.received_audience = received_audience
-        self.expected_audience = expected_audience
-        super().__init__()
+    received_audience: str
+    expected_audience: str

@@ -9,7 +9,12 @@ from minisignxml.config import VerifyConfig
 from minisignxml.errors import UnsupportedAlgorithm
 
 from minisaml.errors import AudienceMismatch, ResponseExpired, ResponseTooEarly
-from minisaml.response import Attribute, gather_attributes, validate_response
+from minisaml.response import (
+    Attribute,
+    TimeDriftLimits,
+    gather_attributes,
+    validate_response,
+)
 
 
 @pytest.mark.freeze_time(
@@ -78,8 +83,33 @@ def test_saml_response_too_early(read):
         validate_response(
             data=data,
             certificate=certificate,
-            expected_audience="https://sp.invalid.com",
+            expected_audience="https://sp.invalid",
         )
+
+
+@pytest.mark.freeze_time(
+    datetime.datetime(
+        year=2020,
+        month=1,
+        day=16,
+        hour=14,
+        minute=32,
+        second=30,
+        tzinfo=datetime.timezone.utc,
+    )
+)
+def test_saml_response_too_early_allowed_time_drift(read):
+    data = read("response.xml.b64")
+    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+    validate_response(
+        data=data,
+        certificate=certificate,
+        expected_audience="https://sp.invalid",
+        allowed_time_drift=TimeDriftLimits(
+            not_before_max_drift=datetime.timedelta(seconds=2),
+            not_on_or_after_max_drift=datetime.timedelta(),
+        ),
+    )
 
 
 @pytest.mark.freeze_time(
@@ -100,6 +130,31 @@ def test_saml_response_expired(read):
         validate_response(
             data=data, certificate=certificate, expected_audience="https://sp.invalid"
         )
+
+
+@pytest.mark.freeze_time(
+    datetime.datetime(
+        year=2020,
+        month=1,
+        day=16,
+        hour=14,
+        minute=34,
+        second=32,
+        tzinfo=datetime.timezone.utc,
+    )
+)
+def test_saml_response_expired_allowed_time_drift(read):
+    data = read("response.xml.b64")
+    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+    validate_response(
+        data=data,
+        certificate=certificate,
+        expected_audience="https://sp.invalid",
+        allowed_time_drift=TimeDriftLimits(
+            not_before_max_drift=datetime.timedelta(),
+            not_on_or_after_max_drift=datetime.timedelta(minutes=2),
+        ),
+    )
 
 
 @pytest.mark.freeze_time(
