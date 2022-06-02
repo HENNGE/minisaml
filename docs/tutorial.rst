@@ -68,7 +68,7 @@ When your handler is called, read the :term:`SAML Response` from the HTTP Reques
 form encoded data and the :term:`SAML Response` is in a field named ``SAMLResponse``. Pass the value of that field,
 unaltered, to MiniSAML to parse and verify the response.
 
-Once you have your ``SAMLResponse``, call :py:func:`validate_response`.
+Once you have your ``SAMLResponse``, call :py:func:`minisaml.response.validate_response`.
 
 For a detailed description of the arguments that function takes, please refer to its API reference. The
 most basic call requires three keyword arguments:
@@ -93,7 +93,7 @@ encoded file and you have the :term:`SAML Response` data in a variable called ``
         expected_audience='https://sp.invalid/example/'
     )
 
-:py:func:`validate_response` will either return a :py:class:`minisaml.response.Response` if the :term:`SAML Response`
+:py:func:`minisaml.response.validate_response` will either return a :py:class:`minisaml.response.Response` if the :term:`SAML Response`
 was valid, or otherwise raise an exception. See the API reference for what exceptions may be raised.
 
 For detailed descriptions of the data available on a :py:class:`minisaml.response.Response` instance, refer to the API

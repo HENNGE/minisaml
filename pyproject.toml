@@ -40,6 +40,7 @@ flask = ">=1.1.2"
 mypy = ">=0.782"
 Sphinx = "^4.2"
 sphinxcontrib-mermaid = "^0.7.0"
+furo = "^2022.4.7"
 
 [tool.isort]
 profile = "black"

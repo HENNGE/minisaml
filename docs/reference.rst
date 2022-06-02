@@ -26,7 +26,7 @@ API Reference
 
     :param data: :term:`SAML Response` as extracted from the HTTP form field ``SAMLResponse``.
     :param certificate: Certificate or collection of certificates used by the :term:`Identity Provider`.
-    :param expected_audience str: :term:`Audience` of your :term:`Identity Provider`.
+    :param expected_audience: :term:`Audience` of your :term:`Identity Provider`.
     :param signature_verification_config: If the :term:`Identity Provider` uses an algorithm other than SHA-256 for
         response signing, you have to enable it by passing an appropriate :py:class:`minisignxml.config.VerifyConfig` instance.
     :param allowed_time_drift: Limits the amount of clock inaccuracy tolerated. Defaults to no inaccuracy allowed.
@@ -134,3 +134,64 @@ API Reference
         :classmethod:
 
         Returns an instance which allows for no drift.
+
+
+Errors
+======
+
+
+.. py:class:: minisaml.errors.MiniSAMLError
+
+    Base error for all errors raised by MiniSAML itself.
+
+.. py:class:: minisaml.errors.MalformedSAMLResponse
+
+    Raised if the :term:`SAML Response` XML is malformed. This is most likely due to a bug in the :term:`Identity Provider`.
+
+.. py:class:: minisaml.errors.ResponseExpired
+
+    Raised if the :term:`SAML Response` is expired. See :ref:`inaccurate-clocks` if you think this
+    exception is raised incorrectly.
+
+    .. py:attribute:: observed_time
+        :type: datetime.datetime
+
+        The datetime observed on our machine.
+
+    .. py:attribute:: no_on_or_after
+        :type: datetime.datetime
+
+        The datetime required by the :term:`SAML Response`
+
+
+.. py:class:: minisaml.errors.ResponseTooEarly
+
+    Raised if the :term:`SAML Response` was created in the future. See :ref:`inaccurate-clocks` if you think this
+    exception is raised incorrectly.
+
+    .. py:attribute:: observed_time
+        :type: datetime.datetime
+
+        The datetime observed on our machine.
+
+    .. py:attribute:: not_before
+        :type: datetime.datetime
+
+        The datetime required by the :term:`SAML Response`
+
+.. py:class:: minisaml.errors.AudienceMismatch
+
+    Raised if the audience in the :term:`SAML Response` does not match what was expected.
+    This is either due to a misconfiguration in the :term:`Identity Provider` or due to the wrong
+    value being passed as ``expected_audience`` to :py:func:`minisaml.response.validate_response`.
+
+    .. py:attribute:: received_audience
+        :type: str
+
+        The audience value in the :term:`SAML Response`
+
+    .. py:attribute:: expected_audience
+        :type: str
+
+        The audience we expected.
+
