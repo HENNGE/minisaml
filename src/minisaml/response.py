@@ -134,7 +134,8 @@ def validate_multi_tenant_response(
         def handle_result(task: "asyncio.Future[ValidationConfig]") -> None:
             if task.cancelled():
                 result_future.cancel()
-            if exc := task.exception():
+            exc = task.exception()
+            if exc is not None:
                 result_future.set_exception(exc)
                 return
             config = task.result()
