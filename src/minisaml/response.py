@@ -3,6 +3,7 @@ import base64
 import datetime
 from dataclasses import dataclass
 from typing import (
+    TYPE_CHECKING,
     Awaitable,
     Callable,
     Collection,
@@ -12,7 +13,6 @@ from typing import (
     Optional,
     Union,
     overload,
-    TYPE_CHECKING,
 )
 
 from cryptography.x509 import Certificate

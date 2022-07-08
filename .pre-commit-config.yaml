@@ -15,7 +15,7 @@ repos:
         pass_filenames: false
     -   id: isort
         name: isort
-        entry: poetry run isort
+        entry: poetry run isort src tests
         language: system
         types: [python]
         pass_filenames: false
