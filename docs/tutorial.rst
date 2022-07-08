@@ -16,7 +16,7 @@ are running into problems installing them, please refer to their respective docu
 for install instructions.
 
 MiniSAML works with any web framework, as long as it is able to redirect users to a URL and
-can accept POST requests.
+can accept POST requests. MiniSAML does not perform any IO itself.
 
 Configuration
 =============
@@ -24,6 +24,7 @@ Configuration
 MiniSAML needs some information about the :term:`Identity Provider` and your own application to work:
 
 * The absolute URL to the SAML endpoint of the :term:`Identity Provider`.
+* The :term:`Issuer` of the :term:`Identity Provider`.
 * The :term:`Audience` your :term:`Service Provider` uses.
 * The SAML Certificate your :term:`Identity Provider` uses. MiniSAML only supports RSA based certificates.
 * The algorithms used by the :term:`Identity Provider` to sign the :term:`SAML Response`.
@@ -74,6 +75,7 @@ For a detailed description of the arguments that function takes, please refer to
 most basic call requires three keyword arguments:
 
 * The :term:`SAML Response` from the form data.
+* The :term:`Issuer` your :term:`Identity Provider` uses.
 * The SAML Certificate your :term:`Identity Provider` uses.
 * The :term:`Audience` your :term:`Service Provider` uses.
 
@@ -90,7 +92,8 @@ encoded file and you have the :term:`SAML Response` data in a variable called ``
     response = validate_response(
         data=saml_response,
         certificate=certificate,
-        expected_audience='https://sp.invalid/example/'
+        expected_audience='https://sp.invalid/example/',
+        idp_issuer='https://idp.invalid/example',
     )
 
 :py:func:`validate_response` will either return a :py:class:`minisaml.response.Response` if the :term:`SAML Response`

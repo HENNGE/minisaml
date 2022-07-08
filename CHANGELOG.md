@@ -1,5 +1,12 @@
 # Changelog
 
+## 22.7
+
+* **Breaking** `minisaml.response.validate_response` now requires an additional parameter `idp_issuer`.
+* **Breaking** Several dependencies had their minimum supported version updated.
+* Added `minisaml.response.validate_multi_tenant_response` to make integrating MiniSAML into multi-tenant systems easier
+  and safer.
+
 ## 22.6
 
 * Added `allowed_time_drift` parameter to `minisaml.response.validate_response` to allow for clock inaccuracies when validating SAML responses.

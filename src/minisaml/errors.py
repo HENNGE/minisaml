@@ -26,3 +26,9 @@ class ResponseTooEarly(MiniSAMLError):
 class AudienceMismatch(MiniSAMLError):
     received_audience: str
     expected_audience: str
+
+
+@dataclass
+class IssuerMismatch(MiniSAMLError):
+    received_issuer: str
+    expected_issuer: str

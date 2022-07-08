@@ -1,22 +1,23 @@
 import datetime
 
 import pytest
+from time_machine import TimeMachineFixture
 
 from minisaml.request import get_request_redirect_url
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2020,
-        month=9,
-        day=14,
-        hour=14,
-        minute=20,
-        second=11,
-        tzinfo=datetime.timezone.utc,
+def test_base64_encoding(time_machine: TimeMachineFixture) -> None:
+    time_machine.move_to(
+        datetime.datetime(
+            year=2020,
+            month=9,
+            day=14,
+            hour=14,
+            minute=20,
+            second=11,
+            tzinfo=datetime.timezone.utc,
+        )
     )
-)
-def test_base64_encoding():
     url = get_request_redirect_url(
         saml_endpoint="https://saml.invalid",
         expected_audience="audience",

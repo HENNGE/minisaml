@@ -45,3 +45,7 @@ Since the clocks of different computers are not always in perfect sync, minisaml
 a maximum amount of inaccuracy for both of those values when validating responses. To do so,
 provide an instance if :py:class:`minisaml.response.TimeDriftLimits` as the ``allowed_time_drift`` argument
 to :py:func:`minisaml.response.validate_response`.
+
+Supporting SAML in a multi-tenant system
+========================================
+
