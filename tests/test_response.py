@@ -1,6 +1,6 @@
 import asyncio
 import datetime
-from typing import Any, List
+from typing import Any, List, Tuple
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
@@ -156,11 +156,16 @@ def test_saml_response_algorithm_mismatch(
 
 @pytest.mark.usefixtures("good_time")
 def test_multi_tenant_saml_response(response_xml_b64: bytes, cert: Certificate) -> None:
-    response = validate_multi_tenant_response(
+    state = object()
+    response, received_state = validate_multi_tenant_response(
         data=response_xml_b64,
-        get_config_for_issuer=lambda issuer: ValidationConfig(certificate=cert),
+        get_config_for_issuer=lambda issuer: (
+            ValidationConfig(certificate=cert),
+            state,
+        ),
         expected_audience="https://sp.invalid",
     )
+    assert received_state is state
     assert response.name_id == "user.name"
     assert response.audience == "https://sp.invalid"
     assert response.in_response_to == "8QmO2elg5T6-GPgr7dZI7v27M-wvMXc1k76B6jleNmM"
@@ -173,15 +178,18 @@ def test_multi_tenant_saml_response(response_xml_b64: bytes, cert: Certificate) 
 async def test_multi_tenant_saml_response_async(
     response_xml_b64: bytes, cert: Certificate
 ) -> None:
-    async def get_config_for_issuer(issuer: str) -> ValidationConfig:
-        assert issuer == "https://idp.invalid"
-        return ValidationConfig(certificate=cert)
+    state = object()
 
-    response = await validate_multi_tenant_response(
+    async def get_config_for_issuer(issuer: str) -> Tuple[ValidationConfig, Any]:
+        assert issuer == "https://idp.invalid"
+        return ValidationConfig(certificate=cert), state
+
+    response, received_state = await validate_multi_tenant_response(
         data=response_xml_b64,
         get_config_for_issuer=get_config_for_issuer,
         expected_audience="https://sp.invalid",
     )
+    assert received_state is state
     assert response.name_id == "user.name"
     assert response.audience == "https://sp.invalid"
     assert response.in_response_to == "8QmO2elg5T6-GPgr7dZI7v27M-wvMXc1k76B6jleNmM"
@@ -197,7 +205,7 @@ def test_multi_tenant_saml_response_error(
     class Error(Exception):
         pass
 
-    def get_config_for_issuer(issuer: str) -> ValidationConfig:
+    def get_config_for_issuer(issuer: str) -> Tuple[ValidationConfig, Any]:
         raise Error()
 
     with pytest.raises(Error):
@@ -212,9 +220,9 @@ def test_multi_tenant_saml_response_error(
 async def test_multi_tenant_saml_response_async_cancelled(
     response_xml_b64: bytes, cert: Certificate, monkeypatch: MonkeyPatch
 ) -> None:
-    async def get_config_for_issuer(issuer: str) -> ValidationConfig:
+    async def get_config_for_issuer(issuer: str) -> Tuple[ValidationConfig, None]:
         assert issuer == "https://idp.invalid"
-        return ValidationConfig(certificate=cert)
+        return ValidationConfig(certificate=cert), None
 
     original = asyncio.ensure_future
 
