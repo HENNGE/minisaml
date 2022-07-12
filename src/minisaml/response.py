@@ -10,6 +10,8 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Tuple,
+    TypeVar,
     Union,
     overload,
 )
@@ -82,17 +84,19 @@ class ValidationConfig:
     allowed_time_drift: TimeDriftLimits = TimeDriftLimits.none()
 
 
-SyncGetConfigForIssuer = Callable[[str], ValidationConfig]
-AsyncGetConfigForIssuer = Callable[[str], Awaitable[ValidationConfig]]
+State = TypeVar("State")
+
+SyncGetConfigForIssuer = Callable[[str], Tuple[ValidationConfig, State]]
+AsyncGetConfigForIssuer = Callable[[str], Awaitable[Tuple[ValidationConfig, State]]]
 
 
 @overload
 def validate_multi_tenant_response(
     *,
     data: Union[bytes, str],
-    get_config_for_issuer: SyncGetConfigForIssuer,
+    get_config_for_issuer: SyncGetConfigForIssuer[State],
     expected_audience: str,
-) -> Response:
+) -> Tuple[Response, State]:
     pass
 
 
@@ -100,59 +104,70 @@ def validate_multi_tenant_response(
 def validate_multi_tenant_response(
     *,
     data: Union[bytes, str],
-    get_config_for_issuer: AsyncGetConfigForIssuer,
+    get_config_for_issuer: AsyncGetConfigForIssuer[State],
     expected_audience: str,
-) -> Awaitable[Response]:
+) -> Awaitable[Tuple[Response, State]]:
     pass
 
 
 def validate_multi_tenant_response(
     *,
     data: Union[bytes, str],
-    get_config_for_issuer: Union[SyncGetConfigForIssuer, AsyncGetConfigForIssuer],
+    get_config_for_issuer: Union[
+        SyncGetConfigForIssuer[State], AsyncGetConfigForIssuer[State]
+    ],
     expected_audience: str,
-) -> Union[Response, Awaitable[Response]]:
+) -> Union[Tuple[Response, State], Awaitable[Tuple[Response, State]]]:
     xml = base64.b64decode(data)
     tree = utils.deserialize_xml(xml)
     assertion = find_or_raise(tree, "./saml:Assertion")
     issuer = find_or_raise(assertion, "./saml:Issuer").text
-    maybe_config = get_config_for_issuer(issuer)
+    maybe_awaitable = get_config_for_issuer(issuer)
 
-    if isinstance(maybe_config, ValidationConfig):
-        return validate_response(
-            data=data,
-            certificate=maybe_config.certificate,
-            expected_audience=expected_audience,
-            idp_issuer=issuer,
-            signature_verification_config=maybe_config.signature_verification_config,
-            allowed_time_drift=maybe_config.allowed_time_drift,
+    if isinstance(maybe_awaitable, tuple):
+        config, state = maybe_awaitable
+        return (
+            validate_response(
+                data=data,
+                certificate=config.certificate,
+                expected_audience=expected_audience,
+                idp_issuer=issuer,
+                signature_verification_config=config.signature_verification_config,
+                allowed_time_drift=config.allowed_time_drift,
+            ),
+            state,
         )
     else:
-        result_future: "asyncio.Future[Response]" = asyncio.Future()
+        result_future: "asyncio.Future[Tuple[Response, State]]" = asyncio.Future()
 
-        def handle_result(task: "asyncio.Future[ValidationConfig]") -> None:
+        def handle_result(
+            task: "asyncio.Future[Tuple[ValidationConfig, State]]",
+        ) -> None:
             if task.cancelled():
                 result_future.cancel()
             exc = task.exception()
             if exc is not None:
                 result_future.set_exception(exc)
                 return
-            config = task.result()
+            config, state = task.result()
             try:
                 result_future.set_result(
-                    validate_response(
-                        data=data,
-                        certificate=config.certificate,
-                        expected_audience=expected_audience,
-                        idp_issuer=issuer,
-                        signature_verification_config=config.signature_verification_config,
-                        allowed_time_drift=config.allowed_time_drift,
+                    (
+                        validate_response(
+                            data=data,
+                            certificate=config.certificate,
+                            expected_audience=expected_audience,
+                            idp_issuer=issuer,
+                            signature_verification_config=config.signature_verification_config,
+                            allowed_time_drift=config.allowed_time_drift,
+                        ),
+                        state,
                     )
                 )
             except Exception as exc:
                 result_future.set_exception(exc)
 
-        task = asyncio.ensure_future(maybe_config)
+        task = asyncio.ensure_future(maybe_awaitable)
         task.add_done_callback(handle_result)
         return result_future
 
