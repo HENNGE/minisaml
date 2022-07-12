@@ -56,8 +56,11 @@ Response
     depends on the :term:`Issuer` of the :term:`Identity Provider`.
 
     MiniSAML will parse the response and call the function passed to ``get_config_for_issuer`` with the :term:`Issuer`
-    as the only argument. This function should then return a :py:class:`minisaml.response.ValidationConfig` instance
-    to use to validate the response. Any exceptions raised in the ``get_config_for_issuer`` function will be forwarded
+    as the only argument. This function should then return a tuple of a :py:class:`minisaml.response.ValidationConfig`
+    instance to use to validate the response and a second value which will be returned by :py:func:`minisaml.response.validate_multi_tenant_response`.
+    This second value can be used to re-use values calculated in ``get_config_for_issuer``, if no such values are needed,
+    use ``None`` as the second item in the tuple instead.
+    Any exceptions raised in the ``get_config_for_issuer`` function will be forwarded
     to the caller of :py:func:`minisaml.response.validate_multi_tenant_response`, as such, exceptions should be used to
     signal an unsupported :term:`Issuer`.
 

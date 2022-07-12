@@ -49,3 +49,38 @@ to :py:func:`minisaml.response.validate_response`.
 Supporting SAML in a multi-tenant system
 ========================================
 
+If you want to have a single :term:`Assertion Consumer Service` used by multiple :term:`Identity Providers <Identity Provider>`,
+you would not know which certificate to use to validate the response before parsing the response. To that end, MiniSAML provides
+the :py:func:`minisaml.response.validate_multi_tenant_response` API, which validates the response in two steps. First, it will
+extract the :term:`Issuer` of the :term:`Identity Provider`, then call the callback function ``get_config_for_issuer`` passed to
+it with the :term:`Issuer` as its only argument. This callback may be synchronous or asynchronous, the return value of
+:py:func:`minisaml.response.validate_multi_tenant_response` becoming asynchronous if the callback is asynchronous. The callback
+should return a tuple of a :py:class:`minisaml.response.ValidationConfig` instance and a value to also be returned by
+:py:func:`minisaml.response.validate_multi_tenant_response`, the second value making it possible to re-use calculations done
+in the callback. If the :term:`Issuer` is not supported, the callback function should raise an exception.
+
+Here's a fictional example on how to use this API::
+
+    def request_handler(request):
+        try:
+            response, tenant_info = validate_multi_tenant_response(
+                data=request.get_form_data("SAMLRequest"),
+                get_config_for_issuer=get_config_for_issuer,
+                expected_audience="https://my.sp/issuer"
+            )
+        except MiniSAMLError:
+            # handle bad saml response
+        except TenantNotFound:
+            # handle unknown tenant
+        # handle validated response
+
+    def get_config_for_issuer(issuer: str) -> tuple[ValidationConfig, TenantInfo]:
+        tenant_info = get_tenant_info_from_saml_issuer(issuer)
+        if not tenant_info:
+            raise TenantNotFound()
+        return ValidationConfig(
+            certificate=tenant_info.saml_certificate,
+        ), tenant_info
+
+    class TenantNotFound(Exception):
+        pass
