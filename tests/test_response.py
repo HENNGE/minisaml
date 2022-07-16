@@ -1,38 +1,40 @@
+import asyncio
 import datetime
+from typing import Any, List, Tuple
 
 import pytest
-from cryptography.hazmat.backends import default_backend
+from _pytest.monkeypatch import MonkeyPatch
 from cryptography.hazmat.primitives import hashes
-from cryptography.x509 import load_pem_x509_certificate
+from cryptography.x509 import Certificate
 from defusedxml.lxml import fromstring
 from minisignxml.config import VerifyConfig
 from minisignxml.errors import UnsupportedAlgorithm
+from time_machine import TimeMachineFixture
 
-from minisaml.errors import AudienceMismatch, ResponseExpired, ResponseTooEarly
+from minisaml.errors import (
+    AudienceMismatch,
+    IssuerMismatch,
+    ResponseExpired,
+    ResponseTooEarly,
+)
 from minisaml.response import (
     Attribute,
     TimeDriftLimits,
+    ValidationConfig,
     gather_attributes,
+    validate_multi_tenant_response,
     validate_response,
 )
+from tests.conftest import Read
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2020,
-        month=1,
-        day=16,
-        hour=14,
-        minute=32,
-        second=32,
-        tzinfo=datetime.timezone.utc,
-    )
-)
-def test_saml_response_ok(read):
-    data = read("response.xml.b64")
-    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+@pytest.mark.usefixtures("good_time")
+def test_saml_response_ok(response_xml_b64: bytes, cert: Certificate) -> None:
     response = validate_response(
-        data=data, certificate=certificate, expected_audience="https://sp.invalid"
+        data=response_xml_b64,
+        certificate=cert,
+        expected_audience="https://sp.invalid",
+        idp_issuer="https://idp.invalid",
     )
     assert response.name_id == "user.name"
     assert response.audience == "https://sp.invalid"
@@ -42,69 +44,39 @@ def test_saml_response_ok(read):
     assert response.attributes[0].extra_attributes == {"ExtraAttribute": "hoge"}
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2020,
-        month=1,
-        day=16,
-        hour=14,
-        minute=32,
-        second=32,
-        tzinfo=datetime.timezone.utc,
-    )
-)
-def test_saml_response_ok_multi_cert(read):
-    data = read("response.xml.b64")
-    expected_cert = load_pem_x509_certificate(read("cert.pem"), default_backend())
-    other_cert = load_pem_x509_certificate(read("cert2.pem"), default_backend())
+@pytest.mark.usefixtures("good_time")
+def test_saml_response_ok_multi_cert(
+    response_xml_b64: bytes, cert: Certificate, cert2: Certificate
+) -> None:
     response = validate_response(
-        data=data,
-        certificate={expected_cert, other_cert},
+        data=response_xml_b64,
+        certificate={cert, cert2},
         expected_audience="https://sp.invalid",
+        idp_issuer="https://idp.invalid",
     )
-    assert response.certificate == expected_cert
+    assert response.certificate == cert
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2020,
-        month=1,
-        day=16,
-        hour=14,
-        minute=32,
-        second=30,
-        tzinfo=datetime.timezone.utc,
-    )
-)
-def test_saml_response_too_early(read):
-    data = read("response.xml.b64")
-    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+@pytest.mark.usefixtures("too_early")
+def test_saml_response_too_early(response_xml_b64: bytes, cert: Certificate) -> None:
     with pytest.raises(ResponseTooEarly):
         validate_response(
-            data=data,
-            certificate=certificate,
+            data=response_xml_b64,
+            certificate=cert,
             expected_audience="https://sp.invalid",
+            idp_issuer="https://idp.invalid",
         )
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2020,
-        month=1,
-        day=16,
-        hour=14,
-        minute=32,
-        second=30,
-        tzinfo=datetime.timezone.utc,
-    )
-)
-def test_saml_response_too_early_allowed_time_drift(read):
-    data = read("response.xml.b64")
-    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+@pytest.mark.usefixtures("too_early")
+def test_saml_response_too_early_allowed_time_drift(
+    response_xml_b64: bytes, cert: Certificate
+) -> None:
     validate_response(
-        data=data,
-        certificate=certificate,
+        data=response_xml_b64,
+        certificate=cert,
         expected_audience="https://sp.invalid",
+        idp_issuer="https://idp.invalid",
         allowed_time_drift=TimeDriftLimits(
             not_before_max_drift=datetime.timedelta(seconds=2),
             not_on_or_after_max_drift=datetime.timedelta(),
@@ -112,44 +84,26 @@ def test_saml_response_too_early_allowed_time_drift(read):
     )
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2020,
-        month=1,
-        day=16,
-        hour=14,
-        minute=34,
-        second=32,
-        tzinfo=datetime.timezone.utc,
-    )
-)
-def test_saml_response_expired(read):
-    data = read("response.xml.b64")
-    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+@pytest.mark.usefixtures("too_late")
+def test_saml_response_expired(response_xml_b64: bytes, cert: Certificate) -> None:
     with pytest.raises(ResponseExpired):
         validate_response(
-            data=data, certificate=certificate, expected_audience="https://sp.invalid"
+            data=response_xml_b64,
+            certificate=cert,
+            expected_audience="https://sp.invalid",
+            idp_issuer="https://idp.invalid",
         )
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2020,
-        month=1,
-        day=16,
-        hour=14,
-        minute=34,
-        second=32,
-        tzinfo=datetime.timezone.utc,
-    )
-)
-def test_saml_response_expired_allowed_time_drift(read):
-    data = read("response.xml.b64")
-    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+@pytest.mark.usefixtures("too_late")
+def test_saml_response_expired_allowed_time_drift(
+    response_xml_b64: bytes, cert: Certificate
+) -> None:
     validate_response(
-        data=data,
-        certificate=certificate,
+        data=response_xml_b64,
+        certificate=cert,
         expected_audience="https://sp.invalid",
+        idp_issuer="https://idp.invalid",
         allowed_time_drift=TimeDriftLimits(
             not_before_max_drift=datetime.timedelta(),
             not_on_or_after_max_drift=datetime.timedelta(minutes=2),
@@ -157,47 +111,42 @@ def test_saml_response_expired_allowed_time_drift(read):
     )
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2020,
-        month=1,
-        day=16,
-        hour=14,
-        minute=32,
-        second=32,
-        tzinfo=datetime.timezone.utc,
-    )
-)
-def test_saml_response_audience_mismatch(read):
-    data = read("response.xml.b64")
-    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+@pytest.mark.usefixtures("good_time")
+def test_saml_response_audience_mismatch(
+    response_xml_b64: bytes, cert: Certificate
+) -> None:
     with pytest.raises(AudienceMismatch):
         validate_response(
-            data=data,
-            certificate=certificate,
+            data=response_xml_b64,
+            certificate=cert,
             expected_audience="https://other.sp.invalid",
+            idp_issuer="https://idp.invalid",
         )
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2020,
-        month=1,
-        day=16,
-        hour=14,
-        minute=32,
-        second=32,
-        tzinfo=datetime.timezone.utc,
-    )
-)
-def test_saml_response_algorithm_mismatch(read):
-    data = read("response.xml.b64")
-    certificate = load_pem_x509_certificate(read("cert.pem"), default_backend())
+@pytest.mark.usefixtures("good_time")
+def test_saml_response_issuer_mismatch(
+    response_xml_b64: bytes, cert: Certificate
+) -> None:
+    with pytest.raises(IssuerMismatch):
+        validate_response(
+            data=response_xml_b64,
+            certificate=cert,
+            expected_audience="https://sp.invalid",
+            idp_issuer="https://other.idp.invalid",
+        )
+
+
+@pytest.mark.usefixtures("good_time")
+def test_saml_response_algorithm_mismatch(
+    response_xml_b64: bytes, cert: Certificate
+) -> None:
     with pytest.raises(UnsupportedAlgorithm):
         validate_response(
-            data=data,
-            certificate=certificate,
+            data=response_xml_b64,
+            certificate=cert,
             expected_audience="https://other.sp.invalid",
+            idp_issuer="https://idp.invalid",
             signature_verification_config=VerifyConfig(
                 allowed_digest_method={hashes.SHA1},
                 allowed_signature_method={hashes.SHA1},
@@ -205,45 +154,142 @@ def test_saml_response_algorithm_mismatch(read):
         )
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2013, month=3, day=18, hour=8, minute=48, second=15, microsecond=127000
+@pytest.mark.usefixtures("good_time")
+def test_multi_tenant_saml_response(response_xml_b64: bytes, cert: Certificate) -> None:
+    state = object()
+    response, received_state = validate_multi_tenant_response(
+        data=response_xml_b64,
+        get_config_for_issuer=lambda issuer: (
+            ValidationConfig(certificate=cert),
+            state,
+        ),
+        expected_audience="https://sp.invalid",
     )
-)
-def test_azure_ad_response_parsing(read, monkeypatch):
-    xml = read("azure_ad_unsigned.xml")
-    tree = fromstring(xml)
+    assert received_state is state
+    assert response.name_id == "user.name"
+    assert response.audience == "https://sp.invalid"
+    assert response.in_response_to == "8QmO2elg5T6-GPgr7dZI7v27M-wvMXc1k76B6jleNmM"
+    assert response.issuer == "https://idp.invalid"
+    assert response.attrs == {"attr name": "attr value"}
+    assert response.attributes[0].extra_attributes == {"ExtraAttribute": "hoge"}
 
-    def null_extract(**kwargs):
-        return tree, None
+
+@pytest.mark.usefixtures("good_time")
+async def test_multi_tenant_saml_response_async(
+    response_xml_b64: bytes, cert: Certificate
+) -> None:
+    state = object()
+
+    async def get_config_for_issuer(issuer: str) -> Tuple[ValidationConfig, Any]:
+        assert issuer == "https://idp.invalid"
+        return ValidationConfig(certificate=cert), state
+
+    response, received_state = await validate_multi_tenant_response(
+        data=response_xml_b64,
+        get_config_for_issuer=get_config_for_issuer,
+        expected_audience="https://sp.invalid",
+    )
+    assert received_state is state
+    assert response.name_id == "user.name"
+    assert response.audience == "https://sp.invalid"
+    assert response.in_response_to == "8QmO2elg5T6-GPgr7dZI7v27M-wvMXc1k76B6jleNmM"
+    assert response.issuer == "https://idp.invalid"
+    assert response.attrs == {"attr name": "attr value"}
+    assert response.attributes[0].extra_attributes == {"ExtraAttribute": "hoge"}
+
+
+@pytest.mark.usefixtures("good_time")
+def test_multi_tenant_saml_response_error(
+    response_xml_b64: bytes, cert: Certificate
+) -> None:
+    class Error(Exception):
+        pass
+
+    def get_config_for_issuer(issuer: str) -> Tuple[ValidationConfig, Any]:
+        raise Error()
+
+    with pytest.raises(Error):
+        validate_multi_tenant_response(
+            data=response_xml_b64,
+            get_config_for_issuer=get_config_for_issuer,
+            expected_audience="https://sp.invalid",
+        )
+
+
+@pytest.mark.usefixtures("good_time")
+async def test_multi_tenant_saml_response_async_cancelled(
+    response_xml_b64: bytes, cert: Certificate, monkeypatch: MonkeyPatch
+) -> None:
+    async def get_config_for_issuer(issuer: str) -> Tuple[ValidationConfig, None]:
+        assert issuer == "https://idp.invalid"
+        return ValidationConfig(certificate=cert), None
+
+    original = asyncio.ensure_future
+
+    def ensure_future_then_cancel(thing: Any) -> Any:
+        fut = original(thing)
+        fut.cancel()
+        return fut
 
     monkeypatch.setattr(
-        "minisaml.response.extract_verified_element_and_certificate", null_extract
+        "minisaml.response.asyncio.ensure_future", ensure_future_then_cancel
     )
+
+    with pytest.raises(asyncio.CancelledError):
+        await validate_multi_tenant_response(
+            data=response_xml_b64,
+            get_config_for_issuer=get_config_for_issuer,
+            expected_audience="https://sp.invalid",
+        )
+
+
+@pytest.mark.usefixtures("null_extract")
+def test_azure_ad_response_parsing(
+    azure_ad_unsigned_b64: bytes, time_machine: TimeMachineFixture, cert: Certificate
+) -> None:
+    time_machine.move_to(
+        datetime.datetime(
+            year=2013,
+            month=3,
+            day=18,
+            hour=8,
+            minute=48,
+            second=15,
+            microsecond=127000,
+        )
+    )
+
     response = validate_response(
-        data=xml, certificate=None, expected_audience="https://www.contoso.com"
+        data=azure_ad_unsigned_b64,
+        certificate=cert,
+        expected_audience="https://www.contoso.com",
+        idp_issuer="https://login.microsoftonline.com/82869000-6ad1-48f0-8171-272ed18796e9/",
     )
     assert response.in_response_to == "id758d0ef385634593a77bdf7e632984b6"
 
 
-@pytest.mark.freeze_time(
-    datetime.datetime(
-        year=2013, month=3, day=18, hour=8, minute=48, second=15, microsecond=128000
+@pytest.mark.usefixtures("null_extract")
+def test_azure_ad_response_microsecond_outdated(
+    azure_ad_unsigned_b64: bytes, time_machine: TimeMachineFixture, cert: Certificate
+) -> None:
+    time_machine.move_to(
+        datetime.datetime(
+            year=2013,
+            month=3,
+            day=18,
+            hour=8,
+            minute=48,
+            second=15,
+            microsecond=128000,
+        )
     )
-)
-def test_azure_ad_response_microsecond_outdated(read, monkeypatch):
-    xml = read("azure_ad_unsigned.xml")
-    tree = fromstring(xml)
 
-    def null_extract(**kwargs):
-        return tree, None
-
-    monkeypatch.setattr(
-        "minisaml.response.extract_verified_element_and_certificate", null_extract
-    )
     with pytest.raises(ResponseExpired):
         validate_response(
-            data=xml, certificate=None, expected_audience="https://www.contoso.com"
+            data=azure_ad_unsigned_b64,
+            certificate=cert,
+            expected_audience="https://www.contoso.com",
+            idp_issuer="https://login.microsoftonline.com/82869000-6ad1-48f0-8171-272ed18796e9/",
         )
 
 
@@ -473,7 +519,9 @@ def test_azure_ad_response_microsecond_outdated(read, monkeypatch):
         ),
     ],
 )
-def test_attributes(filename, attributes, values, read):
+def test_attributes(
+    filename: str, attributes: List[Attribute], values: List[str], read: Read
+) -> None:
     xml = read(filename)
     tree = fromstring(xml)
     result = list(gather_attributes(tree))

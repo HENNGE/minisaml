@@ -36,10 +36,10 @@ API references.
     :maxdepth: 2
     :hidden:
 
-    how-to
-    reference
     saml-intro
     tutorial
+    how-to
+    reference
 
 Indices and tables
 ==================

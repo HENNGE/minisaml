@@ -1,17 +1,32 @@
+import asyncio
 import base64
 import datetime
 from dataclasses import dataclass
-from typing import Collection, Dict, Iterable, List, Optional, Union
+from typing import (
+    Awaitable,
+    Callable,
+    Collection,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from cryptography.x509 import Certificate
 from lxml.etree import QName
 from lxml.etree import _Element as Element
 from minisignxml.config import VerifyConfig
 from minisignxml.errors import ElementNotFound
+from minisignxml.internal import utils
 from minisignxml.verify import extract_verified_element_and_certificate
 
 from .errors import (
     AudienceMismatch,
+    IssuerMismatch,
     MalformedSAMLResponse,
     ResponseExpired,
     ResponseTooEarly,
@@ -62,11 +77,107 @@ class TimeDriftLimits:
         )
 
 
+@dataclass(frozen=True)
+class ValidationConfig:
+    certificate: Union[Certificate, Collection[Certificate]]
+    signature_verification_config: VerifyConfig = VerifyConfig.default()
+    allowed_time_drift: TimeDriftLimits = TimeDriftLimits.none()
+
+
+State = TypeVar("State")
+
+SyncGetConfigForIssuer = Callable[[str], Tuple[ValidationConfig, State]]
+AsyncGetConfigForIssuer = Callable[[str], Awaitable[Tuple[ValidationConfig, State]]]
+
+
+@overload
+def validate_multi_tenant_response(
+    *,
+    data: Union[bytes, str],
+    get_config_for_issuer: SyncGetConfigForIssuer[State],
+    expected_audience: str,
+) -> Tuple[Response, State]:
+    pass
+
+
+@overload
+def validate_multi_tenant_response(
+    *,
+    data: Union[bytes, str],
+    get_config_for_issuer: AsyncGetConfigForIssuer[State],
+    expected_audience: str,
+) -> Awaitable[Tuple[Response, State]]:
+    pass
+
+
+def validate_multi_tenant_response(
+    *,
+    data: Union[bytes, str],
+    get_config_for_issuer: Union[
+        SyncGetConfigForIssuer[State], AsyncGetConfigForIssuer[State]
+    ],
+    expected_audience: str,
+) -> Union[Tuple[Response, State], Awaitable[Tuple[Response, State]]]:
+    xml = base64.b64decode(data)
+    tree = utils.deserialize_xml(xml)
+    assertion = find_or_raise(tree, "./saml:Assertion")
+    issuer = find_or_raise(assertion, "./saml:Issuer").text
+    maybe_awaitable = get_config_for_issuer(issuer)
+
+    if isinstance(maybe_awaitable, tuple):
+        config, state = maybe_awaitable
+        return (
+            validate_response(
+                data=data,
+                certificate=config.certificate,
+                expected_audience=expected_audience,
+                idp_issuer=issuer,
+                signature_verification_config=config.signature_verification_config,
+                allowed_time_drift=config.allowed_time_drift,
+            ),
+            state,
+        )
+    else:
+        result_future: "asyncio.Future[Tuple[Response, State]]" = asyncio.Future()
+
+        def handle_result(
+            task: "asyncio.Future[Tuple[ValidationConfig, State]]",
+        ) -> None:
+            if task.cancelled():
+                result_future.cancel()
+            exc = task.exception()
+            if exc is not None:
+                result_future.set_exception(exc)
+                return
+            config, state = task.result()
+            try:
+                result_future.set_result(
+                    (
+                        validate_response(
+                            data=data,
+                            certificate=config.certificate,
+                            expected_audience=expected_audience,
+                            idp_issuer=issuer,
+                            signature_verification_config=config.signature_verification_config,
+                            allowed_time_drift=config.allowed_time_drift,
+                        ),
+                        state,
+                    )
+                )
+            except Exception as exc:
+                result_future.set_exception(exc)
+
+        task = asyncio.ensure_future(maybe_awaitable)
+        task.add_done_callback(handle_result)
+        return result_future
+
+
 def validate_response(
     *,
     data: Union[bytes, str],
     certificate: Union[Certificate, Collection[Certificate]],
     expected_audience: str,
+    idp_issuer: str,
     signature_verification_config: VerifyConfig = VerifyConfig.default(),
     allowed_time_drift: TimeDriftLimits = TimeDriftLimits.none(),
 ) -> Response:
@@ -88,6 +199,8 @@ def validate_response(
             "Signed element is neither a Response with an Assertion, nor an Assertion"
         )
     issuer = find_or_raise(assertion, "./saml:Issuer").text
+    if issuer != idp_issuer:
+        raise IssuerMismatch(received_issuer=issuer, expected_issuer=idp_issuer)
     subject = find_or_raise(assertion, "./saml:Subject")
     name_id = find_or_raise(subject, "./saml:NameID").text
     subject_confirmation_method = find_or_raise(subject, "./saml:SubjectConfirmation")

@@ -33,6 +33,11 @@ Key concepts and terms
         MiniSAML does not provide support for building Identity Providers.
         Identity Provider is often shortened to IdP.
 
+    Issuer
+        A unique identifier of each party in SAML. Both a :term:`Service Provider` and
+        :term:`Identity Provider` have an :term:`Issuer`. To a :term:`Identity Provider`,
+        the :term:`Issuer` of the :term:`Service Provider` is called the :term:`Audience`.
+
     SAML Request
         A request sent from the :term:`Service Provider` to the :term:`Identity Provider` to
         authenticate a user. MiniSAML generates these for you.
@@ -52,10 +57,10 @@ Key concepts and terms
         result of the :term:`SAML Request`. MiniSAML parses these for you.
 
     Audience
-        Identifier of a :term:`Service Provider`. This is used by the :term:`Identity Provider` to
-        distinguish different :term:`Service Providers<Service Provider>`.
-        The specification also calls this the *Issuer* of a :term:`Service Provider`, but to prevent confusion with *Issuer* of the :term:`Identity Provider`, MiniSAML refers to this as :term:`Audience`.
-        :term:`Audience` is called *Entity ID* by some :term:`Identity Providers<Identity Provider>`.
+        The :term:`Issuer` of a :term:`Service Provider`. This is used by the :term:`Identity Provider` to
+        distinguish different :term:`Service Providers<Service Provider>`. Since both the :term:`Identity Provider`
+        and the :term:`Service Provider` have an :term:`Issuer`, MiniSAML refers to the :term:`Service Provider` :term:`Issuer`
+        as the :term:`Audience`. Some :term:`Identity Providers<Identity Provider>` refer to :term:`Audience` as the *Entity ID*.
 
     Assertion Consumer Service
         An endpoint on the :term:`Service Provider` which handles :term:`SAML Response` sent from
