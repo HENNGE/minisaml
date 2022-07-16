@@ -16,13 +16,24 @@
 
 
 # -- Project information -----------------------------------------------------
+from pathlib import Path
 
 project = "MiniSAML"
 copyright = "2020, HENNGE K.K."
 author = "HENNGE K.K."
 
 # The full version, including alpha/beta/rc tags
-release = "20.8b0"
+release = (
+    next(
+        line
+        for line in (Path(__file__).parent.parent / "pyproject.toml")
+        .read_text()
+        .splitlines(keepends=False)
+        if line.startswith("version")
+    )
+    .split("=")[1]
+    .strip(" '\"")
+)
 
 
 # -- General configuration ---------------------------------------------------

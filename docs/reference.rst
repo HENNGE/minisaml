@@ -49,6 +49,7 @@ Response
     :raises minisaml.errors.IssuerMismatch:
     :raises lxml.etree.LxmlError:
 
+
 .. autofunction:: minisaml.response.validate_multi_tenant_response
 
     This function allows for easy support of multi-tenant systems, where a single :term:`Assertion Consumer Service`
