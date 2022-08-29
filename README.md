@@ -20,9 +20,9 @@ It only supports requests via HTTP Redirect and responses via HTTP POST.
 from minisaml.request import get_request_redirect_url
 
 url = get_request_redirect_url(
-    saml_endpoint='https://your-idp.invalid/sso-endpoint/', 
-    expected_audience='Your SAML Issuer', 
-    acs_url='https://you.web-site.invalid/saml/acs/'
+    saml_endpoint="https://your-idp.invalid/sso-endpoint/",
+    expected_audience="Your SAML Issuer",
+    acs_url="https://you.web-site.invalid/saml/acs/"
 )
 
 # This line depends on your web framework/server
@@ -35,13 +35,18 @@ redirect_user_to_url(url)
 from minisaml.response import validate_response
 
 # This line depends on your web framework/server
-saml_response = get_SAMLResponse_form_data_as_bytes() 
+saml_response = get_SAMLResponse_form_data_as_bytes()
 
 # Load the x509 certificate as a cryptography.x509.Certificate somehow
 certificate = ...
 
 try:
-    response = validate_response(data=saml_response, certificate=certificate, expected_audience='Your SAML Issuer')
+    response = validate_response(
+        data=saml_response,
+        certificate=certificate,
+        expected_audience="Your SAML Issuer",
+        idp_issuer="https://your-idp.invalid/issuer/"
+    )
 except:
     handle_invalid_response_somehow()
 
