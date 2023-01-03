@@ -31,4 +31,4 @@ def get_request_redirect_url(
     }
     if relay_state is not None:
         query["RelayState"] = relay_state
-    return str(URL(saml_endpoint).with_query(query))
+    return str(URL(saml_endpoint).update_query(query))
