@@ -1,5 +1,10 @@
 # Changelog
 
+## 23.1
+
+* Added support for `saml_endpoint` URLs with a query string in `minisaml.request.get_request_redirect_url` thanks to a
+  contribution by [@thesebas](https://github.com/thesebas).
+
 ## 22.7
 
 * **Breaking** `minisaml.response.validate_response` now requires an additional parameter `idp_issuer`.
