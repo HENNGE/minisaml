@@ -2,9 +2,9 @@ import datetime
 
 import pytest
 from time_machine import TimeMachineFixture
+from yarl import URL
 
 from minisaml.request import get_request_redirect_url
-from yarl import URL
 
 
 def test_base64_encoding(time_machine: TimeMachineFixture) -> None:
