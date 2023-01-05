@@ -6,6 +6,7 @@ from time_machine import TimeMachineFixture
 from minisaml.request import get_request_redirect_url
 from yarl import URL
 
+
 def test_base64_encoding(time_machine: TimeMachineFixture) -> None:
     time_machine.move_to(
         datetime.datetime(
@@ -41,6 +42,6 @@ def test_endpoint_url_merge() -> None:
     )
 
     query = URL(url).query.keys()
-    
-    assert 'idpid' in query
-    assert 'SAMLRequest' in query
+
+    assert "idpid" in query
+    assert "SAMLRequest" in query
