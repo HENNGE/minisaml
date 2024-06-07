@@ -2,11 +2,37 @@ name: workflow
 
 on: [push, pull_request]
 
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSIONS: '["3.8", "3.9", "3.10", "3.11", "3.12"]'
+  POETRY_VERSION: 1.8.3
+
 jobs:
+  # workaround since matrix can not access `env` but can access `needs`
+  python-versions:
+    runs-on: "ubuntu-latest"
+    outputs:
+      versions: ${{ steps.set-versions.outputs.versions }}
+    steps:
+      - id: set-versions
+        run: echo "versions=$PYTHON_VERSIONS" >> $GITHUB_OUTPUT
+
   lock:
+    needs: python-versions
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ${{ fromJSON(needs.python-versions.outputs.versions) }}
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
@@ -19,11 +45,12 @@ jobs:
         with:
           path: poetry.lock
           key: ${{ github.sha }}-${{ matrix.python-version }}
+  
   pytest:
-    needs: lock
+    needs: [lock, python-versions]
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ${{ fromJSON(needs.python-versions.outputs.versions) }}
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
@@ -37,11 +64,12 @@ jobs:
       - run: curl -sSL https://install.python-poetry.org | python3 -
       - run: poetry install
       - run: poetry run pytest --verbose
+  
   mypy:
-    needs: lock
+    needs: [lock, python-versions]
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ${{ fromJSON(needs.python-versions.outputs.versions) }}
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
@@ -55,6 +83,7 @@ jobs:
       - run: curl -sSL https://install.python-poetry.org | python3 -
       - run: poetry install
       - run: poetry run mypy
+  
   isort:
     needs: lock
     runs-on: "ubuntu-latest"
@@ -70,6 +99,7 @@ jobs:
       - run: curl -sSL https://install.python-poetry.org | python3 -
       - run: poetry install
       - run: poetry run isort --check --diff src tests
+  
   black:
     needs: lock
     runs-on: "ubuntu-latest"
