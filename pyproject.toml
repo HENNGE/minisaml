@@ -23,7 +23,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-minisignxml = ">=22.4"
+minisignxml = ">=24.6"
 lxml = "^5.0"
 yarl = ">=1.4.2"
 # poetry doesn't support extras in dev-dependencies, so these must be here as optional dependencies
