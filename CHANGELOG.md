@@ -1,5 +1,11 @@
 # Changelog
 
+## 24.6
+
+* Minimum supported lxml version is now 5.0.
+* Minimum supported minisignxml version is now 24.6.
+* Added support for python 3.12.
+
 ## 23.1
 
 * Added support for `saml_endpoint` URLs with a query string in `minisaml.request.get_request_redirect_url` thanks to a
