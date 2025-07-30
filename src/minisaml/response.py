@@ -211,7 +211,7 @@ def validate_response(
     conditions = find_or_raise(assertion, "./saml:Conditions")
     not_before = saml_to_datetime(conditions.attrib["NotBefore"])
     not_on_or_after = saml_to_datetime(conditions.attrib["NotOnOrAfter"])
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     if now + allowed_time_drift.not_before_max_drift < not_before:
         raise ResponseTooEarly(observed_time=now, not_before=not_before)
     if now - allowed_time_drift.not_on_or_after_max_drift >= not_on_or_after:

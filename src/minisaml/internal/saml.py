@@ -12,8 +12,12 @@ def datetime_to_saml(t: datetime.datetime) -> str:
 
 def saml_to_datetime(s: str) -> datetime.datetime:
     if "." in s:
-        return datetime.datetime.strptime(s, DATE_TIME_FORMAT_FRACTIONAL)
-    return datetime.datetime.strptime(s, DATE_TIME_FORMAT)
+        return datetime.datetime.strptime(s, DATE_TIME_FORMAT_FRACTIONAL).replace(
+            tzinfo=datetime.timezone.utc
+        )
+    return datetime.datetime.strptime(s, DATE_TIME_FORMAT).replace(
+        tzinfo=datetime.timezone.utc
+    )
 
 
 def build_saml_request(
@@ -24,7 +28,7 @@ def build_saml_request(
         samlp.NameIDPolicy(Format=NAMEID_FORMAT_UNSPECIFIED),
         ID=request_id,
         Version="2.0",
-        IssueInstant=datetime_to_saml(datetime.datetime.utcnow()),
+        IssueInstant=datetime_to_saml(datetime.datetime.now(datetime.timezone.utc)),
         ProtocolBinding=BINDINGS_HTTP_POST,
         AssertionConsumerServiceURL=acs_url,
     )
