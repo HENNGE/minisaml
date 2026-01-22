@@ -12,36 +12,36 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3 :: Only",
     "Typing :: Typed"
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-minisignxml = ">=24.6"
-lxml = "^5.0"
-yarl = ">=1.4.2"
+python = "^3.10"
+minisignxml = ">=26.1"
+lxml = "^6.0"
+yarl = ">=1.22.0"
 # poetry doesn't support extras in dev-dependencies, so these must be here as optional dependencies
-Sphinx = { version = "^5", optional = true }
-sphinxcontrib-mermaid = { version = "^0.7.0", optional = true }
-furo = { version = "^2022.6.21", optional = true }
+Sphinx = { version = "^8", optional = true }
+sphinxcontrib-mermaid = { version = "^2.0.0", optional = true }
+furo = { version = "^2025.12.19", optional = true }
 
 [tool.poetry.extras]
 docs = ["sphinx", "sphinxcontrib-mermaid", "furo"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = ">=5.2"
 isort = "5.10.1"
 black = "^22"
-cryptography = "^37"
-cffi = "^1.15"
-flask = ">=1.1.2"
-mypy = ">=0.961"
+cryptography = "^46"
+cffi = "^2.0"
+flask = ">=3.1.2"
+mypy = ">=1.19"
 pytest-asyncio = "^0.18.3"
 time-machine = "^2.7.1"
 
