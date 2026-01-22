@@ -145,12 +145,11 @@ def validate_multi_tenant_response(
         ) -> None:
             if task.cancelled():
                 result_future.cancel()
-            exc = task.exception()
-            if exc is not None:
-                result_future.set_exception(exc)
                 return
-            config, state = task.result()
+
             try:
+                config, state = task.result()
+
                 result_future.set_result(
                     (
                         validate_response(
