@@ -1,7 +1,6 @@
 import base64
 import secrets
 import zlib
-from typing import Optional
 
 from yarl import URL
 
@@ -14,8 +13,8 @@ def get_request_redirect_url(
     expected_audience: str,
     acs_url: str,
     force_reauthentication: bool = False,
-    request_id: Optional[str] = None,
-    relay_state: Optional[str] = None,
+    request_id: str | None = None,
+    relay_state: str | None = None,
 ) -> str:
     request_xml = build_saml_request(
         issuer=expected_audience,

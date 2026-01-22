@@ -2,7 +2,12 @@ import datetime
 
 from minisignxml.internal.utils import serialize_xml
 
-from .constants import *
+from .constants import (
+    BINDINGS_HTTP_POST,
+    DATE_TIME_FORMAT,
+    DATE_TIME_FORMAT_FRACTIONAL,
+    NAMEID_FORMAT_UNSPECIFIED,
+)
 from .namespaces import saml, samlp
 
 

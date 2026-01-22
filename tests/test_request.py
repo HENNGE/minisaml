@@ -1,6 +1,5 @@
 import datetime
 
-import pytest
 from time_machine import TimeMachineFixture
 from yarl import URL
 
