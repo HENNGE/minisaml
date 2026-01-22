@@ -71,6 +71,10 @@ class TimeDriftLimits:
 
 @dataclass(frozen=True)
 class ValidationConfig:
+    """
+    ValidationConfig(certificate, signature_verification_config=VerifyConfig.default(), allowed_time_drift=TimeDriftLimits.none())
+    """
+
     certificate: Certificate | Collection[Certificate]
     signature_verification_config: VerifyConfig = VerifyConfig.default()
     allowed_time_drift: TimeDriftLimits = TimeDriftLimits.none()
