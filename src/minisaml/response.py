@@ -1,18 +1,10 @@
 import asyncio
 import base64
 import datetime
+from collections.abc import Awaitable, Callable, Collection, Iterable
 from dataclasses import dataclass
 from typing import (
-    Awaitable,
-    Callable,
-    Collection,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -31,7 +23,7 @@ from .errors import (
     ResponseExpired,
     ResponseTooEarly,
 )
-from .internal.constants import *
+from .internal.constants import NAMES_SAML2_ASSERTION, NAMES_SAML2_PROTOCOL
 from .internal.namespaces import NAMESPACE_MAP
 from .internal.saml import saml_to_datetime
 from .internal.utils import find_or_raise
@@ -40,12 +32,12 @@ from .internal.utils import find_or_raise
 @dataclass(frozen=True)
 class Attribute:
     name: str
-    values: List[str]
-    format: Optional[str]
-    extra_attributes: Dict[str, str]
+    values: list[str]
+    format: str | None
+    extra_attributes: dict[str, str]
 
     @property
-    def value(self) -> Optional[str]:
+    def value(self) -> str | None:
         return self.values[0] if self.values else None
 
 
@@ -54,13 +46,13 @@ class Response:
     issuer: str
     name_id: str
     audience: str
-    attributes: List[Attribute]
-    session_not_on_or_after: Optional[datetime.datetime]
-    in_response_to: Optional[str]
+    attributes: list[Attribute]
+    session_not_on_or_after: datetime.datetime | None
+    in_response_to: str | None
     certificate: Certificate
 
     @property
-    def attrs(self) -> Dict[str, Optional[str]]:
+    def attrs(self) -> dict[str, str | None]:
         return {attr.name: attr.value for attr in self.attributes}
 
 
@@ -79,45 +71,44 @@ class TimeDriftLimits:
 
 @dataclass(frozen=True)
 class ValidationConfig:
-    certificate: Union[Certificate, Collection[Certificate]]
+    certificate: Certificate | Collection[Certificate]
     signature_verification_config: VerifyConfig = VerifyConfig.default()
     allowed_time_drift: TimeDriftLimits = TimeDriftLimits.none()
 
 
 State = TypeVar("State")
 
-SyncGetConfigForIssuer = Callable[[str], Tuple[ValidationConfig, State]]
-AsyncGetConfigForIssuer = Callable[[str], Awaitable[Tuple[ValidationConfig, State]]]
+SyncGetConfigForIssuer = Callable[[str], tuple[ValidationConfig, State]]
+AsyncGetConfigForIssuer = Callable[[str], Awaitable[tuple[ValidationConfig, State]]]
 
 
 @overload
 def validate_multi_tenant_response(
     *,
-    data: Union[bytes, str],
+    data: bytes | str,
     get_config_for_issuer: SyncGetConfigForIssuer[State],
     expected_audience: str,
-) -> Tuple[Response, State]:
+) -> tuple[Response, State]:
     pass
 
 
 @overload
 def validate_multi_tenant_response(
     *,
-    data: Union[bytes, str],
+    data: bytes | str,
     get_config_for_issuer: AsyncGetConfigForIssuer[State],
     expected_audience: str,
-) -> Awaitable[Tuple[Response, State]]:
+) -> Awaitable[tuple[Response, State]]:
     pass
 
 
 def validate_multi_tenant_response(
     *,
-    data: Union[bytes, str],
-    get_config_for_issuer: Union[
-        SyncGetConfigForIssuer[State], AsyncGetConfigForIssuer[State]
-    ],
+    data: bytes | str,
+    get_config_for_issuer: SyncGetConfigForIssuer[State]
+    | AsyncGetConfigForIssuer[State],
     expected_audience: str,
-) -> Union[Tuple[Response, State], Awaitable[Tuple[Response, State]]]:
+) -> tuple[Response, State] | Awaitable[tuple[Response, State]]:
     xml = base64.b64decode(data)
     tree = utils.deserialize_xml(xml)
     assertion = find_or_raise(tree, "./saml:Assertion")
@@ -138,10 +129,10 @@ def validate_multi_tenant_response(
             state,
         )
     else:
-        result_future: "asyncio.Future[Tuple[Response, State]]" = asyncio.Future()
+        result_future: asyncio.Future[tuple[Response, State]] = asyncio.Future()
 
         def handle_result(
-            task: "asyncio.Future[Tuple[ValidationConfig, State]]",
+            task: "asyncio.Future[tuple[ValidationConfig, State]]",
         ) -> None:
             if task.cancelled():
                 result_future.cancel()
@@ -173,8 +164,8 @@ def validate_multi_tenant_response(
 
 def validate_response(
     *,
-    data: Union[bytes, str],
-    certificate: Union[Certificate, Collection[Certificate]],
+    data: bytes | str,
+    certificate: Certificate | Collection[Certificate],
     expected_audience: str,
     idp_issuer: str,
     signature_verification_config: VerifyConfig = VerifyConfig.default(),

@@ -36,17 +36,36 @@ docs = ["sphinx", "sphinxcontrib-mermaid", "furo"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=5.2"
-isort = "5.10.1"
-black = "^22"
 cryptography = "^46"
 cffi = "^2.0"
 flask = ">=3.1.2"
 mypy = ">=1.19"
 pytest-asyncio = "^0.18.3"
 time-machine = "^2.7.1"
+ruff = "^0.14.13"
 
-[tool.isort]
-profile = "black"
+[tool.ruff]
+line-length = 88
+exclude = [
+    "examples/",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "E722", # Do not use bare `except`
+    "E501", # Line too long (104 > 88 characters)
+    "E731", # Do not assign a `lambda` expression, use a `def`
+    "UP046",
+    "UP047",
+]
+select = [
+    "DTZ",
+    "E",
+    "F",
+    "I",
+    "T201", # Don't commit print statements
+    "UP",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

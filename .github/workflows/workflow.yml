@@ -84,34 +84,19 @@ jobs:
       - run: poetry install
       - run: poetry run mypy
   
-  isort:
+  ruff:
     needs: lock
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
       - uses: actions/cache@v5
         with:
           path: poetry.lock
-          key: ${{ github.sha }}-3.12
+          key: ${{ github.sha }}-3.14
       - run: curl -sSL https://install.python-poetry.org | python3 -
       - run: poetry install
-      - run: poetry run isort --check --diff src tests
-  
-  black:
-    needs: lock
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - uses: actions/cache@v5
-        with:
-          path: poetry.lock
-          key: ${{ github.sha }}-3.12
-      - run: curl -sSL https://install.python-poetry.org | python3 -
-      - run: poetry install
-      - run: poetry run black --check src/ tests/
+      - run: poetry run ruff check src/ tests/
+      - run: poetry run ruff format --check src/ tests/

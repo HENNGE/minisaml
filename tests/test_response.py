@@ -1,6 +1,6 @@
 import asyncio
 import datetime
-from typing import Any, List, Tuple
+from typing import Any
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
@@ -180,7 +180,7 @@ async def test_multi_tenant_saml_response_async(
 ) -> None:
     state = object()
 
-    async def get_config_for_issuer(issuer: str) -> Tuple[ValidationConfig, Any]:
+    async def get_config_for_issuer(issuer: str) -> tuple[ValidationConfig, Any]:
         assert issuer == "https://idp.invalid"
         return ValidationConfig(certificate=cert), state
 
@@ -205,7 +205,7 @@ def test_multi_tenant_saml_response_error(
     class Error(Exception):
         pass
 
-    def get_config_for_issuer(issuer: str) -> Tuple[ValidationConfig, Any]:
+    def get_config_for_issuer(issuer: str) -> tuple[ValidationConfig, Any]:
         raise Error()
 
     with pytest.raises(Error):
@@ -220,7 +220,7 @@ def test_multi_tenant_saml_response_error(
 async def test_multi_tenant_saml_response_async_cancelled(
     response_xml_b64: bytes, cert: Certificate, monkeypatch: MonkeyPatch
 ) -> None:
-    async def get_config_for_issuer(issuer: str) -> Tuple[ValidationConfig, None]:
+    async def get_config_for_issuer(issuer: str) -> tuple[ValidationConfig, None]:
         assert issuer == "https://idp.invalid"
         return ValidationConfig(certificate=cert), None
 
@@ -256,6 +256,7 @@ def test_azure_ad_response_parsing(
             minute=48,
             second=15,
             microsecond=127000,
+            tzinfo=datetime.timezone.utc,
         )
     )
 
@@ -281,6 +282,7 @@ def test_azure_ad_response_microsecond_outdated(
             minute=48,
             second=15,
             microsecond=128000,
+            tzinfo=datetime.timezone.utc,
         )
     )
 
@@ -520,7 +522,7 @@ def test_azure_ad_response_microsecond_outdated(
     ],
 )
 def test_attributes(
-    filename: str, attributes: List[Attribute], values: List[str], read: Read
+    filename: str, attributes: list[Attribute], values: list[str], read: Read
 ) -> None:
     xml = read(filename)
     tree = fromstring(xml)

@@ -1,6 +1,6 @@
 import datetime
+from collections.abc import Callable, Collection
 from pathlib import Path
-from typing import Callable, Collection, Tuple
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
@@ -48,7 +48,7 @@ def null_extract(monkeypatch: MonkeyPatch) -> None:
         xml: bytes,
         certificates: Collection[Certificate],
         config: VerifyConfig = VerifyConfig.default(),
-    ) -> Tuple[Element, Certificate]:
+    ) -> tuple[Element, Certificate]:
         return fromstring(xml), next(iter(certificates))
 
     monkeypatch.setattr(
