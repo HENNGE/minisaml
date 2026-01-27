@@ -14,6 +14,10 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import cryptography.x509
+
+# Without this remapping, autodoc is unable to interlink cryptography docs
+cryptography.x509.Certificate.__module__ = "cryptography.x509"
 
 # -- Project information -----------------------------------------------------
 from pathlib import Path
@@ -69,3 +73,5 @@ html_theme = "furo"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
+
+autodoc_preserve_defaults = True
