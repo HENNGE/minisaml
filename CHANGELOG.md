@@ -1,5 +1,13 @@
 # Changelog
 
+## 26.1
+
+* Added support for python 3.13 and 3.14.
+* Dropped support for python 3.8 and 3.9.
+* Minimum supported lxml version is now 6.0.
+* Minimum supported minisignxml version is now 26.1.
+* Minimum supported yarl version is now 1.22.0.
+
 ## 24.6
 
 * Minimum supported lxml version is now 5.0.
